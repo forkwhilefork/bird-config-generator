@@ -58,7 +58,7 @@ def main(config_file, output_path):
                                 prefixes_with_more_specifics.append(str(prefix_parsed) + "{" + str(prefix_parsed.prefixlen) + ",24}")
                             else:
                                 prefixes_with_more_specifics.append(str(prefix_parsed))
-                        session['ipv4']['prefixes'] = prefixes_with_more_specifics
+                        session['ipv4']['prefixes_str'] = ", ".join(prefixes_with_more_specifics)
                     else:
                         print("ERROR: session \"" + session['name'] + "\" filtering method set to \"prefix-list\". ipv4 section is defined and therefore must contain prefix list.")
                         sys.exit(1)
@@ -76,7 +76,7 @@ def main(config_file, output_path):
                                 prefixes_with_more_specifics.append(str(prefix_parsed) + "{" + str(prefix_parsed.prefixlen) + ",48}")
                             else:
                                 prefixes_with_more_specifics.append(str(prefix_parsed))
-                        session['ipv6']['prefixes'] = prefixes_with_more_specifics
+                        session['ipv6']['prefixes_str'] = ", ".join(prefixes_with_more_specifics)
                     else:
                         print("ERROR: session \"" + session['name'] + "\" filtering method set to \"prefix-list\". ipv4 section is defined and therefore must contain prefix list.")
                         sys.exit(1)

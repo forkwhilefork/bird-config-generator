@@ -7,7 +7,7 @@ filter bgp_in_{{ session.type }}_{{ session.name }}
     if ( net.type = NET_IP4 ) then {
         {% if session.ipv4 is defined %}
         if ! rt_import_customer({{ session.asn }},
-            {{ session.ipv4.prefixes }})
+            [{{ session.ipv4.prefixes_str }}])
         then reject;
         {% else %}
         reject;
@@ -15,7 +15,7 @@ filter bgp_in_{{ session.type }}_{{ session.name }}
     } else {
         {% if session.ipv6 is defined %}
         if ! rt_import_customer({{ session.asn }},
-            {{ session.ipv6.prefixes }})
+            [{{ session.ipv6.prefixes_str }}])
         then reject;
         {% else %}
         reject;
