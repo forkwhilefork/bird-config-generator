@@ -62,6 +62,9 @@ filter bgp_out_{{ session.type }}_{{ session.name }}
 
 {% if session.ipv4 is defined %}
 protocol bgp bgp_{{ session.type }}_{{ session.name }}_v4 {
+    {% if session.multihop %}
+    multihop;
+    {% endif %}
     ipv4 {
         {% if session.stop_bgp %}
         import keep filtered;
@@ -84,7 +87,7 @@ protocol bgp bgp_{{ session.type }}_{{ session.name }}_v4 {
     };
 
     {% if session.ipv4.password is defined %}
-        password "{{ session.ipv4.password }}";
+    password "{{ session.ipv4.password }}";
     {% endif %}
     local as MY_AS;
     {% if session.type == "internal" %}
@@ -93,11 +96,17 @@ protocol bgp bgp_{{ session.type }}_{{ session.name }}_v4 {
     neighbor {{ session.ipv4.peer_ip }} as {{ session.asn }};
     default bgp_local_pref {{ session.local_pref }};
     {% endif %}
+    {% if session.ipv4.source_ip is defined %}
+    source ip {{ session.ipv4.source_ip }};
+    {% endif %}
 }
 {% endif %}
 
 {% if session.ipv6 is defined %}
 protocol bgp bgp_{{ session.type }}_{{ session.name }}_v6 {
+    {% if session.multihop %}
+    multihop;
+    {% endif %}
     ipv6 {
         {% if session.stop_bgp %}
         import keep filtered;
@@ -128,6 +137,9 @@ protocol bgp bgp_{{ session.type }}_{{ session.name }}_v6 {
     {% else %}
     neighbor {{ session.ipv6.peer_ip }} as {{ session.asn }};
     default bgp_local_pref {{ session.local_pref }};
+    {% endif %}
+    {% if session.ipv6.source_ip is defined %}
+    source ip {{ session.ipv6.source_ip }};
     {% endif %}
 }
 {% endif %}

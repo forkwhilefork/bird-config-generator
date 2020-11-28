@@ -41,10 +41,16 @@
                     "stop_bgp":{
                         "type":"boolean"
                     },
+                    "multihop":{
+                        "type":"boolean"
+                    },
                     "ipv4":{
                         "type":"object",
                         "properties":{
                             "peer_ip":{
+                                "type":"string"
+                            },
+                            "source_ip":{
                                 "type":"string"
                             },
                             "password":{
@@ -70,6 +76,9 @@
                         "type":"object",
                         "properties":{
                             "peer_ip":{
+                                "type":"string"
+                            },
+                            "source_ip":{
                                 "type":"string"
                             },
                             "password":{
