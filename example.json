@@ -1,0 +1,87 @@
+{
+    "hostname": "example_router",
+    "bgp_sessions": [
+        {
+            "name": "my_other_router",
+            "type": "internal",
+            "ipv4": {
+                "peer_ip": "192.0.2.1"
+            },
+            "ipv6": {
+                "peer_ip": "2001:db8:6000:ff00::2"
+            }
+        },
+        {
+            "name": "Transit1",
+            "type": "transit",
+            "ipv4": {
+                "peer_ip": "192.0.2.250"
+            },
+            "ipv6": {
+                "peer_ip": "2001:db8:900:a::31"
+            },
+            "asn": 65000,
+            "local_pref": 50
+        },
+        {
+            "name": "Transit2",
+            "type": "transit",
+            "ipv4": {
+                "peer_ip": "192.0.2.251"
+            },
+            "ipv6": {
+                "peer_ip": "2001:db8:3000:30::1"
+            },
+            "asn": 65001,
+            "local_pref": 50
+        },
+        {
+            "name": "Customer1",
+            "type": "customer",
+            "filtering_method": "prefix-list",
+            "ipv4": {
+                "peer_ip": "192.0.2.9",
+                "password": "hunter2",
+                "prefixes": ["198.51.100.0/24", "203.0.113.0/24"],
+                "prefix_limit": 50
+            },
+            "ipv6": {
+                "peer_ip": "2001:db8:6000:ff03::2",
+                "password": "hunter2",
+                "prefixes": ["2001:db8:c000::/40", "2001:db8:7000::/36"],
+                "prefix_limit": 100
+            },
+            "asn": 65002,
+            "local_pref": 120
+        },
+        {
+            "name": "Customer2",
+            "type": "customer",
+            "filtering_method": "prefix-list",
+            "ipv6": {
+                "peer_ip": "2001:db8:6000:101::23",
+                "password": "hunter3",
+                "prefixes": ["2001:db8:7812::/48"],
+                "prefix_limit": 10
+            },
+            "asn": 65003,
+            "local_pref": 120
+        },
+        {
+            "name": "Collector1",
+            "type": "collector",
+            "multihop": true,
+            "ipv4": {
+                "peer_ip": "192.0.2.130",
+                "source_ip": "192.0.2.67"
+            },
+            "ipv6": {
+                "peer_ip": "2001:db8:2001::130",
+                "source_ip": "2001:db8:6000:100::3"
+            },
+            "asn": 65004,
+            "local_pref": 120
+        }
+
+    ]
+}
