@@ -55,6 +55,12 @@ filter bgp_out_{{ session.type }}_{{ session.name }}
     apply_export_communities({{ session.asn }});
     {% endif %}
 
+    {% if session.prepends is defined %}
+    {% for n in range(session.prepends) %}
+    bgp_path.prepend(MY_AS);
+    {% endfor %}
+    {% endif %}
+
     accept;
 }
 

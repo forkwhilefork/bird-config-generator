@@ -102,6 +102,10 @@
                             "irr-as-set",
                             "irr-autnum"
                         ]
+                    },
+                    "prepends":{
+                        "type":"integer",
+                        "minimum": 1
                     }
                 },
                 "required":[
