@@ -1,0 +1,133 @@
+{% if session.type != "internal" %}
+filter bgp_in_{{ session.type }}_{{ session.name }}
+{
+    {% if session.type == "transit" %}
+    if ! rt_import_transit({{ session.asn }}) then reject;
+    {% elif session.type == "customer" or session.type == "peer" %}
+    if ( net.type = NET_IP4 ) then {
+        {% if session.ipv4 is defined %}
+        if ! rt_import_customer({{ session.asn }},
+            {{ session.ipv4.prefixes }})
+        then reject;
+        {% else %}
+        reject;
+        {% endif %}
+    } else {
+        {% if session.ipv6 is defined %}
+        if ! rt_import_customer({{ session.asn }},
+            {{ session.ipv6.prefixes }})
+        then reject;
+        {% else %}
+        reject;
+        {% endif %}
+    }
+    {% elif session.type == "collector" %}
+    reject;
+    {% endif %}
+
+    bgp_large_community.delete([(MY_AS, INFO_SOURCE, *)]);
+    bgp_large_community.delete([(MY_AS, INFO_AS, *)]);
+    {% if session.type == "transit" %}
+    bgp_large_community.add((MY_AS,INFO_SOURCE,FROM_TRANSIT));
+    {% elif session.type == "customer" %}
+    bgp_large_community.add((MY_AS,INFO_SOURCE,FROM_CUSTOMER));
+    {% elif session.type == "peer" %}
+    bgp_large_community.add((MY_AS,INFO_SOURCE,FROM_PEER));
+    {% endif %}
+    bgp_large_community.add((MY_AS,INFO_AS,{{ session.asn }}));
+    accept;
+}
+{% endif %}
+
+filter bgp_out_{{ session.type }}_{{ session.name }}
+{
+    {% if session.type == "transit" %}
+    if ! rt_export_transit() then reject;
+    {% if session.backup %}
+    bgp_path.prepend(MY_AS);
+    {% endif %}
+    {% elif session.type == "customer" or session.type == "collector" or session.type == "internal" %}
+    if ! rt_export_customer() then reject;
+    {% elif session.type == "peer" %}
+    # do nothing, for now
+    # eventually this will be rt_export_peer(...)
+    {% endif %}
+
+    {% if session.type != "internal" %}
+    apply_export_communities({{ session.asn }});
+    {% endif %}
+
+    accept;
+}
+
+{% if session.ipv4 is defined %}
+protocol bgp bgp_{{ session.type }}_{{ session.name }}_v4 {
+    ipv4 {
+        {% if session.stop_bgp %}
+        import keep filtered;
+        import none;
+        export none;
+        {% else %}
+        {% if session.type == "internal" %}
+        import all;
+        export filter bgp_out_{{ session.type }}_{{ session.name }};
+        next hop self;
+        {% else %}
+        import keep filtered;
+        import filter bgp_in_{{ session.type }}_{{ session.name }};
+        {% if session.ipv4.prefix_limit is defined %}
+        import limit {{ session.ipv4.prefix_limit }} action block;
+        {% endif %}
+        export filter bgp_out_{{ session.type }}_{{ session.name }};
+        {% endif %}
+        {% endif %}
+    };
+
+    {% if session.ipv4.password is defined %}
+        password "{{ session.ipv4.password }}";
+    {% endif %}
+    local as MY_AS;
+    {% if session.type == "internal" %}
+    neighbor {{ session.ipv4.peer_ip }} as MY_AS;
+    {% else %}
+    neighbor {{ session.ipv4.peer_ip }} as {{ session.asn }};
+    default bgp_local_pref {{ session.local_pref }};
+    {% endif %}
+}
+{% endif %}
+
+{% if session.ipv6 is defined %}
+protocol bgp bgp_{{ session.type }}_{{ session.name }}_v6 {
+    ipv6 {
+        {% if session.stop_bgp %}
+        import keep filtered;
+        import none;
+        export none;
+        {% else %}
+        {% if session.type == "internal" %}
+        import all;
+        export filter bgp_out_{{ session.type }}_{{ session.name }};
+        next hop self;
+        {% else %}
+        import keep filtered;
+        import filter bgp_in_{{ session.type }}_{{ session.name }};
+        {% if session.ipv6.prefix_limit is defined %}
+        import limit {{ session.ipv6.prefix_limit }} action block;
+        {% endif %}
+        export filter bgp_out_{{ session.type }}_{{ session.name }};
+        {% endif %}
+        {% endif %}
+    };
+
+    {% if session.ipv6.password is defined %}
+    password "{{ session.ipv6.password }}";
+    {% endif %}
+    local as MY_AS;
+    {% if session.type == "internal" %}
+    neighbor {{ session.ipv6.peer_ip }} as MY_AS;
+    {% else %}
+    neighbor {{ session.ipv6.peer_ip }} as {{ session.asn }};
+    default bgp_local_pref {{ session.local_pref }};
+    {% endif %}
+}
+{% endif %}
