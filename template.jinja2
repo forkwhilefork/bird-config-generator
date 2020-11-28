@@ -1,4 +1,4 @@
-{% if session.type != "internal" %}
+{% if session.type != "internal" and session.type != "collector" %}
 filter bgp_in_{{ session.type }}_{{ session.name }}
 {
     {% if session.type == "transit" %}
@@ -21,8 +21,6 @@ filter bgp_in_{{ session.type }}_{{ session.name }}
         reject;
         {% endif %}
     }
-    {% elif session.type == "collector" %}
-    reject;
     {% endif %}
 
     bgp_large_community.delete([(MY_AS, INFO_SOURCE, *)]);
@@ -75,6 +73,9 @@ protocol bgp bgp_{{ session.type }}_{{ session.name }}_v4 {
         import all;
         export filter bgp_out_{{ session.type }}_{{ session.name }};
         next hop self;
+        {% elif session.type == "collector" %}
+        import none;
+        export filter bgp_out_{{ session.type }}_{{ session.name }};
         {% else %}
         import keep filtered;
         import filter bgp_in_{{ session.type }}_{{ session.name }};
@@ -117,6 +118,9 @@ protocol bgp bgp_{{ session.type }}_{{ session.name }}_v6 {
         import all;
         export filter bgp_out_{{ session.type }}_{{ session.name }};
         next hop self;
+        {% elif session.type == "collector" %}
+        import none;
+        export filter bgp_out_{{ session.type }}_{{ session.name }};
         {% else %}
         import keep filtered;
         import filter bgp_in_{{ session.type }}_{{ session.name }};
