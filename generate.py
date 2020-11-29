@@ -2,7 +2,7 @@ from jinja2 import Template
 from jsonschema import validate
 import argparse, ipaddress, json, os, re, sys
 
-def main(config_file, template_file, output_path):
+def main(config_file, template_file, schema_file, output_path):
     with open(template_file, 'r') as file:
         template_text = file.read()
 
@@ -10,7 +10,7 @@ def main(config_file, template_file, output_path):
         config_text = file.read()
     config = json.loads(config_text)
 
-    with open('schema.json', 'r') as file:
+    with open(schema_file, 'r') as file:
         schema_text = file.read()
     schema = json.loads(schema_text)
 
@@ -100,8 +100,9 @@ if __name__ == "__main__":
 
     parser.add_argument('--config', help='json file with information used to generate router config', type=str, required=True)
     parser.add_argument('--template', help='jinja2 template providing the config structure', type=str, required=True)
+    parser.add_argument('--schema', help='json schema used to validate the config file', type=str, required=True)
     parser.add_argument('--outputFolder', help='folder where generated files go', type=str, required=True)
 
     args=parser.parse_args()
 
-    main(args.config, args.template, args.outputFolder)
+    main(args.config, args.template, args.schema, args.outputFolder)
