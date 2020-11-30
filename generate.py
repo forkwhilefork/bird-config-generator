@@ -85,7 +85,43 @@ def main(config_file, template_file, schema_file, output_path):
             else:
                 print("ERROR: session \"" + session['name'] + "\" filtering method set to unrecognised value. this should have been caught by json schema validation.")
                 sys.exit(1)
+        
+        # peer IPs should be valid
+        if "ipv4" in session:
+            try:
+                ipaddress.IPv4Address(session['ipv4']['peer_ip'])
+            except ValueError:
+                print("ERROR: session \"" + session['name'] + "\" ipv4 peer IP \"" + session['ipv4']['peer_ip'] + "\" is not valid")
+                sys.exit(1)
+        if "ipv6" in session:
+            try:
+                ipaddress.IPv6Address(session['ipv6']['peer_ip'])
+            except ValueError:
+                print("ERROR: session \"" + session['name'] + "\" ipv6 peer IP \"" + session['ipv6']['peer_ip'] + "\" is not valid")
+                sys.exit(1)
+        
+        # source IPs should be valid
+        if "ipv4" in session and "source_ip" in session['ipv4']:
+            try:
+                ipaddress.IPv4Address(session['ipv4']['source_ip'])
+            except ValueError:
+                print("ERROR: session \"" + session['name'] + "\" ipv4 source IP \"" + session['ipv4']['source_ip'] + "\" is not valid")
+                sys.exit(1)
+        if "ipv6" in session and "source_ip" in session['ipv6']:
+            try:
+                ipaddress.IPv6Address(session['ipv6']['source_ip'])
+            except ValueError:
+                print("ERROR: session \"" + session['name'] + "\" ipv6 source IP \"" + session['ipv6']['source_ip'] + "\" is not valid")
+                sys.exit(1)
 
+        # ASN and local_pref are required if session type is not internal
+        if session['type'] != "internal":
+            if "asn" not in session:
+                print("ERROR: session \"" + session['name'] + "\" is not type \"internal\" and therefore must have asn defined")
+                sys.exit(1)
+            if "local_pref" not in session:
+                print("ERROR: session \"" + session['name'] + "\" is not type \"internal\" and therefore must have local_pref defined")
+                sys.exit(1)
 
     # render template
     t = Template(template_text)
