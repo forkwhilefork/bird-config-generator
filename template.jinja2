@@ -3,7 +3,7 @@ filter bgp_in_{{ session.type }}_{{ session.name }}
 {
     {% if session.type == "transit" %}
     if ! rt_import_transit({{ session.asn }}) then reject;
-    {% elif session.type == "customer" or session.type == "peer" %}
+    {% elif session.type == "customer" %}
     if ( net.type = NET_IP4 ) then {
         {% if session.ipv4 is defined %}
         if ! rt_import_customer({{ session.asn }},
@@ -21,6 +21,24 @@ filter bgp_in_{{ session.type }}_{{ session.name }}
         reject;
         {% endif %}
     }
+    {% elif session.type == "peer" %}
+    if ( net.type = NET_IP4 ) then {
+        {% if session.ipv4 is defined %}
+        if ! rt_import_peer({{ session.asn }},
+            [{{ session.ipv4.prefixes_str }}])
+        then reject;
+        {% else %}
+        reject;
+        {% endif %}
+    } else {
+        {% if session.ipv6 is defined %}
+        if ! rt_import_peer({{ session.asn }},
+            [{{ session.ipv6.prefixes_str }}])
+        then reject;
+        {% else %}
+        reject;
+        {% endif %}
+    }
     {% endif %}
 
     bgp_large_community.delete([(MY_AS, INFO_SOURCE, *)]);
@@ -30,7 +48,7 @@ filter bgp_in_{{ session.type }}_{{ session.name }}
     {% elif session.type == "customer" %}
     bgp_large_community.add((MY_AS,INFO_SOURCE,FROM_CUSTOMER));
     {% elif session.type == "peer" %}
-    bgp_large_community.add((MY_AS,INFO_SOURCE,FROM_PEER));
+    bgp_large_community.add((MY_AS,INFO_SOURCE,FROM_PUBLIC_PEER));
     {% endif %}
     bgp_large_community.add((MY_AS,INFO_AS,{{ session.asn }}));
     accept;
@@ -47,8 +65,7 @@ filter bgp_out_{{ session.type }}_{{ session.name }}
     {% elif session.type == "customer" or session.type == "collector" or session.type == "internal" %}
     if ! rt_export_customer() then reject;
     {% elif session.type == "peer" %}
-    # do nothing, for now
-    # eventually this will be rt_export_peer(...)
+    if ! rt_export_peer() then reject;
     {% endif %}
 
     {% if session.type != "internal" %}
