@@ -136,10 +136,10 @@ def main(config_file, template_file, schema_file, output_path):
 if __name__ == "__main__":
     parser=argparse.ArgumentParser()
 
-    parser.add_argument('--config', help='json file with information used to generate router config', type=str, required=True)
-    parser.add_argument('--template', help='jinja2 template providing the config structure', type=str, required=True)
-    parser.add_argument('--schema', help='json schema used to validate the config file', type=str, required=True)
-    parser.add_argument('--outputFolder', help='folder where generated files go', type=str, required=True)
+    parser.add_argument('--config', help='json file with information used to generate router config', type=str, required=True, default='config.json')
+    parser.add_argument('--template', help='jinja2 template providing the config structure', type=str, required=True, default='template.jinja2')
+    parser.add_argument('--schema', help='json schema used to validate the config file', type=str, required=True, default='schema.json')
+    parser.add_argument('--outputFolder', help='folder where generated files go', type=str, required=True, default='.')
 
     args=parser.parse_args()
 
