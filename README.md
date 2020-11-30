@@ -26,4 +26,4 @@ optional arguments:
 ```
 
 ## Validation
-Validation is done in two parts. First, it checks the config file against the schema for basic things (e.g. "is this field the right data type?"). Then it checks more complex rules (e.g. "is at least one of ipv4,ipv6 defined?").
+Validation is done in two parts. First, it checks the config file against the schema for basic things (e.g. "is this field the right data type?"). Then it checks more complex rules (e.g. "is at least one of ipv4,ipv6 defined?"). If either step fails, it will print a descriptive error and exit. No files will be created.
