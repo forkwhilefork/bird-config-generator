@@ -33,6 +33,7 @@ def main(config_file, template_file, schema_file, output_path):
                 if "as-set" in session:
                     #TODO: generate prefix list from IRR
                     print("filtering with IRR is not implemented yet, sorry")
+                    sys.exit(1)
                 else:
                     print("ERROR: session \"" + session['name'] + "\" filtering method set to \"irr-as-set\". \"as-set\" must be defined.")
                     sys.exit(1)
@@ -40,6 +41,7 @@ def main(config_file, template_file, schema_file, output_path):
                 if "as-set" in session:
                     #TODO: generate prefix list from IRR
                     print("filtering with IRR is not implemented yet, sorry")
+                    sys.exit(1)
                 else:
                     print("ERROR: session \"" + session['name'] + "\" filtering method set to \"irr-autnum\". \"autnum\" must be defined.")
                     sys.exit(1)
