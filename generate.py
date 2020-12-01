@@ -2,6 +2,30 @@ from jinja2 import Template
 from jsonschema import validate
 import argparse, ipaddress, json, os, re, sys
 
+# What to indent with
+INDENT_WITH = " " * 4 # 4 spaces
+INDENT_PLUS = ["{"] # Characters that trigger indentation level+
+INDENT_MINUS = ["}"] # Characters that trigger indentation level-
+
+# thanks to FHR#6025 on BGPeople for this function
+def bird_indent(conf):
+    level = 0
+    out = ""
+    for line in conf.split('\n'):
+        line = line.strip()
+
+        # indent minus
+        if sum(map(lambda x: x in line, INDENT_MINUS)) > 0:
+            level -= 1
+        
+        out += f"{level * INDENT_WITH}{line}\n"
+        
+        # indent plus
+        if sum(map(lambda x: x in line, INDENT_PLUS)) > 0:
+            level += 1
+   
+    return(out)
+
 def main(config_file, template_file, schema_file, output_path):
     with open(template_file, 'r') as file:
         template_text = file.read()
@@ -130,6 +154,7 @@ def main(config_file, template_file, schema_file, output_path):
         conf = t.render(session=session, trim_blocks=True, lstrip_blocks=True)
         conf = re.sub(r'\n\s*\n', '\n', conf)
         conf = re.sub(r'}\n', '}\n\n', conf)
+        conf = bird_indent(conf)
         with open(os.path.join(output_path, "bgp_" + session['type'] + "_" + session['name'] + ".conf"), 'w') as writer:
             writer.write(conf)
 

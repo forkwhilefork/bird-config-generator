@@ -1,21 +1,18 @@
 {% if session.type != "internal" and session.type != "collector" %}
-filter bgp_in_{{ session.type }}_{{ session.name }}
-{
+filter bgp_in_{{ session.type }}_{{ session.name }} {
     {% if session.type == "transit" %}
     if ! rt_import_transit({{ session.asn }}) then reject;
     {% elif session.type == "customer" %}
     if ( net.type = NET_IP4 ) then {
         {% if session.ipv4 is defined %}
-        if ! rt_import_customer({{ session.asn }},
-            [{{ session.ipv4.prefixes_str }}])
+        if ! rt_import_customer({{ session.asn }}, [{{ session.ipv4.prefixes_str }}])
         then reject;
         {% else %}
         reject;
         {% endif %}
     } else {
         {% if session.ipv6 is defined %}
-        if ! rt_import_customer({{ session.asn }},
-            [{{ session.ipv6.prefixes_str }}])
+        if ! rt_import_customer({{ session.asn }}, [{{ session.ipv6.prefixes_str }}])
         then reject;
         {% else %}
         reject;
@@ -55,8 +52,7 @@ filter bgp_in_{{ session.type }}_{{ session.name }}
 }
 {% endif %}
 
-filter bgp_out_{{ session.type }}_{{ session.name }}
-{
+filter bgp_out_{{ session.type }}_{{ session.name }} {
     {% if session.type == "transit" %}
     if ! rt_export_transit() then reject;
     {% if session.backup %}
