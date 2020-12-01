@@ -26,7 +26,7 @@ def bird_indent(conf):
    
     return(out)
 
-def main(config_file, template_file, schema_file, output_path):
+def main(config_file, template_file, schema_file, output_path, dryRun):
     with open(template_file, 'r') as file:
         template_text = file.read()
 
@@ -155,8 +155,9 @@ def main(config_file, template_file, schema_file, output_path):
         conf = re.sub(r'\n\s*\n', '\n', conf)
         conf = re.sub(r'}\n', '}\n\n', conf)
         conf = bird_indent(conf)
-        with open(os.path.join(output_path, "bgp_" + session['type'] + "_" + session['name'] + ".conf"), 'w') as writer:
-            writer.write(conf)
+        if not dryRun:
+            with open(os.path.join(output_path, "bgp_" + session['type'] + "_" + session['name'] + ".conf"), 'w') as writer:
+                writer.write(conf)
 
 if __name__ == "__main__":
     parser=argparse.ArgumentParser()
@@ -165,7 +166,8 @@ if __name__ == "__main__":
     parser.add_argument('--template', help='jinja2 template providing the config structure', type=str, required=True, default='template.jinja2')
     parser.add_argument('--schema', help='json schema used to validate the config file', type=str, required=True, default='schema.json')
     parser.add_argument('--outputFolder', help='folder where generated files go', type=str, required=True, default='.')
+    parser.add_argument('--dryRun', help='check config validity but do not generate any files', type=bool, default=False)
 
     args=parser.parse_args()
 
-    main(args.config, args.template, args.schema, args.outputFolder)
+    main(args.config, args.template, args.schema, args.outputFolder, args.dryRun)
