@@ -115,6 +115,51 @@
             },
             "minItems":1,
             "uniqueItems":true
+        },
+        "rpki_protocols":{
+            "type":"array",
+            "items":{
+                "type":"object",
+                "properties":{
+                    "name":{
+                        "type":"string"
+                    },
+                    "roa4_table":{
+                        "type":"string"
+                    },
+                    "roa6_table":{
+                        "type":"string"
+                    },
+                    "ip":{
+                        "type":"string"
+                    },
+                    "port":{
+                        "type":"integer"
+                    },
+                    "retry_time":{
+                        "type":"integer"
+                    },
+                    "retry_keep":{
+                        "type":"boolean"
+                    },
+                    "refresh_time":{
+                        "type":"integer"
+                    },
+                    "refresh_keep":{
+                        "type":"boolean"
+                    },
+                    "expire_time":{
+                        "type":"integer"
+                    },
+                    "expire_keep":{
+                        "type":"boolean"
+                    }
+                },
+                "required":[
+                    "name",
+                    "ip"
+                ]
+            }
         }
     },
     "required":[
