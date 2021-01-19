@@ -38,8 +38,10 @@ def generate_config(config_file, template_file, schema_file):
         schema_text = file.read()
     schema = json.loads(schema_text)
 
-    # validate config
+    # validate config against schema
     validate(instance=config, schema=schema)
+
+    # validate config against "business" logic
     for session in config['bgp_sessions']:
         # need at least one ip protocol version defined
         if not "ipv4" in session and not "ipv6" in session:
@@ -147,17 +149,33 @@ def generate_config(config_file, template_file, schema_file):
                 print("ERROR: session \"" + session['name'] + "\" is not type \"internal\" and therefore must have local_pref defined")
                 sys.exit(1)
 
+    for rpki in config['rpki_protocols']:
+        # need at least one roa table version defined
+        if not "roa4_table" in rpki and not "roa6_table" in rpki:
+            print("ERROR: rpki protocol \"" + rpki['name'] + "\" must define at least one of roa4_table,roa6_table")
+            sys.exit(1)
+        
+        # no spaces in protocol name
+        if " " in rpki['name']:
+            print("ERROR: rpki protocol \"" + session['name'] + "\" name must not contain spaces")
+            sys.exit(1)
+        
+        # ip should be valid
+        try:
+            ipaddress.IPv4Address(rpki['ip'])
+        except ValueError:
+            print("ERROR: rpki protocol \"" + rpki['name'] + "\" has invalid IP \"" + rpki['ip'] + "\"")
+            sys.exit(1)
+
     # render template
     t = Template(template_text)
 
     output = ""
 
-    for session in config['bgp_sessions']:
-        conf = t.render(session=session, trim_blocks=True, lstrip_blocks=True)
-        conf = re.sub(r'\n\s*\n', '\n', conf)
-        conf = re.sub(r'}\n', '}\n\n', conf)
-        conf = bird_indent(conf)
-        output += conf
+    output = t.render(config=config, trim_blocks=True, lstrip_blocks=True)
+    output = re.sub(r'\n\s*\n', '\n', output)
+    output = re.sub(r'}\n', '}\n\n', output)
+    output = bird_indent(output)
     
     return output
 
