@@ -1,6 +1,6 @@
 # bird-config-generator
 
-I'm not good at naming things, so it's exactly what it sounds like.
+A utility for generating a valid configuration file for the [bird](https://bird.network.cz/) routing daemon from a json config file.
 
 ## Requirements
 python3 and some modules:
@@ -26,4 +26,4 @@ optional arguments:
 ```
 
 ## Validation
-Validation is done in two parts. First, it checks the config file against the schema for basic things (e.g. "is this field the right data type?"). Then it checks more complex rules (e.g. "is at least one of ipv4,ipv6 defined?"). If either step fails, it will print a descriptive error and exit, and no files will be created.
+Validation is done in two parts. First, it checks the config file against the schema for basic things (e.g. "is this field the right data type?"). Then it checks more complex rules (e.g. "is at least one of ipv4,ipv6 defined?"). If either step fails, it will print a descriptive error and exit, and no files will be created or modified.
