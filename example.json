@@ -83,5 +83,46 @@
             "local_pref": 120
         }
 
-    ]
+    ],
+    "rpki_protocols": [
+        {
+            "name": "gortr",
+            "roa4_table": "roa_v4",
+            "roa6_table": "roa_v6",
+            "ip": "192.0.2.100",
+            "port": 8282,
+            "retry_time": 90,
+            "retry_keep": true,
+            "refresh_time": 900,
+            "refresh_keep": true,
+            "expire_time": 172800,
+            "expire_keep": true
+        }
+    ],
+    "static_routes_v4": {
+        "filter_name": "static_filter",
+        "routes": [
+            {
+                "destination": "198.18.0.0/15",
+                "blackhole": true
+            },
+            {
+                "destination": "240.0.0.0/4",
+                "next_hop": "23.147.64.117"
+            }
+        ]
+    },
+    "static_routes_v6": {
+        "filter_name": "static_filter",
+        "routes": [
+            {
+                "destination": "2001:db8:7820::/48",
+                "blackhole": true
+            },
+            {
+                "destination": "2001:db8:7830:0200::/56",
+                "next_hop": "2001:db8:7820:0101::13"
+            }
+        ]
+    }
 }
