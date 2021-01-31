@@ -178,7 +178,7 @@
                             "blackhole": {
                                 "type": "boolean"
                             },
-                            "next-hop": {
+                            "next_hop": {
                                 "type": "string"
                             }
                         },
@@ -210,7 +210,7 @@
                             "blackhole": {
                                 "type": "boolean"
                             },
-                            "next-hop": {
+                            "next_hop": {
                                 "type": "string"
                             }
                         },

@@ -8,7 +8,7 @@
             {% if route.blackhole %}
                 route {{ route.destination }} reject;
             {% else %}
-                route {{ route.destination }} via {{ route.next-hop }};
+                route {{ route.destination }} via {{ route.next_hop }};
             {% endif %}
         {% endfor %}
     }
@@ -24,7 +24,7 @@
             {% if route.blackhole %}
                 route {{ route.destination }} reject;
             {% else %}
-                route {{ route.destination }} via {{ route.next-hop }};
+                route {{ route.destination }} via {{ route.next_hop }};
             {% endif %}
         {% endfor %}
     }

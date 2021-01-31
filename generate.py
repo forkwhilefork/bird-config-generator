@@ -168,30 +168,30 @@ def generate_config(config_file, template_file, schema_file):
             sys.exit(1)
 
     for route in config['static_routes_v4']['routes']:
-        # exactly one of {blackhole,next-hop} should be defined
-        if (not "blackhole" in route and not "next-hop" in route) or ("blackhole" in route and "next-hop" in route):
-            print("ERROR: static IPv4 route for \"" + route['destination'] + "\" must define exactly one of blackhole,next-hop")
+        # exactly one of {blackhole,next_hop} should be defined
+        if (not "blackhole" in route and not "next_hop" in route) or ("blackhole" in route and "next_hop" in route):
+            print("ERROR: static IPv4 route for \"" + route['destination'] + "\" must define exactly one of blackhole,next_hop")
             sys.exit(1)
         
-        # destination and next-hop (if it exists) should be valid
+        # destination and next_hop (if it exists) should be valid
         try:
             prefix_parsed = ipaddress.IPv4Network(route['destination'], strict=True)
         except ValueError:
             print("ERROR: static IPv4 route destination \"" + route['destination'] + "\" is not valid")
             sys.exit(1)
 
-        # next-hop (if it exists) should be valid
-        if "next-hop" in route:
+        # next_hop (if it exists) should be valid
+        if "next_hop" in route:
             try:
-                ipaddress.IPv4Address(route['next-hop'])
+                ipaddress.IPv4Address(route['next_hop'])
             except ValueError:
-                print("ERROR: static IPv4 route \"" + route['destination'] + "\" has invalid next-hop \"" + route['next-hop'] + "\"")
+                print("ERROR: static IPv4 route \"" + route['destination'] + "\" has invalid next_hop \"" + route['next_hop'] + "\"")
                 sys.exit(1)
 
     for route in config['static_routes_v6']['routes']:
-        # exactly one of {blackhole,next-hop} should be defined
-        if (not "blackhole" in route and not "next-hop" in route) or ("blackhole" in route and "next-hop" in route):
-            print("ERROR: static IPv6 route for \"" + route['destination'] + "\" must define exactly one of blackhole,next-hop")
+        # exactly one of {blackhole,next_hop} should be defined
+        if (not "blackhole" in route and not "next_hop" in route) or ("blackhole" in route and "next_hop" in route):
+            print("ERROR: static IPv6 route for \"" + route['destination'] + "\" must define exactly one of blackhole,next_hop")
             sys.exit(1)
         
         # destination should be valid
@@ -201,12 +201,12 @@ def generate_config(config_file, template_file, schema_file):
             print("ERROR: static IPv6 route destination \"" + route['destination'] + "\" is not valid")
             sys.exit(1)
 
-        # next-hop (if it exists) should be valid
-        if "next-hop" in route:
+        # next_hop (if it exists) should be valid
+        if "next_hop" in route:
             try:
-                ipaddress.IPv6Address(route['next-hop'])
+                ipaddress.IPv6Address(route['next_hop'])
             except ValueError:
-                print("ERROR: static IPv6 route \"" + route['destination'] + "\" has invalid next-hop \"" + route['next-hop'] + "\"")
+                print("ERROR: static IPv6 route \"" + route['destination'] + "\" has invalid next_hop \"" + route['next_hop'] + "\"")
                 sys.exit(1)
 
     # render template
