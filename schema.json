@@ -155,15 +155,77 @@
                         "type":"boolean"
                     }
                 },
-                "required":[
+                "required": [
                     "name",
                     "ip"
                 ]
             }
+        },
+        "static_routes_v4":{
+            "type":"object",
+            "properties":{
+                "filter_name": {
+                    "type": "string"
+                },
+                "routes": {
+                    "type": "array",
+                    "items":{
+                        "type":"object",
+                        "properties":{
+                            "destination": {
+                                "type": "string"
+                            },
+                            "blackhole": {
+                                "type": "boolean"
+                            },
+                            "next_hop": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "destination"
+                        ]
+                    }
+                }
+            },
+            "required": [
+                "routes",
+                "filter_name"
+            ]
+        },
+        "static_routes_v6":{
+            "type":"object",
+            "properties":{
+                "filter_name": {
+                    "type": "string"
+                },
+                "routes": {
+                    "type": "array",
+                    "items":{
+                        "type":"object",
+                        "properties":{
+                            "destination": {
+                                "type": "string"
+                            },
+                            "blackhole": {
+                                "type": "boolean"
+                            },
+                            "next_hop": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "destination"
+                        ]
+                    }
+                }
+            },
+            "required": [
+                "routes"
+            ]
         }
     },
     "required":[
-        "hostname",
-        "bgp_sessions"
+        "hostname"
     ]
 }

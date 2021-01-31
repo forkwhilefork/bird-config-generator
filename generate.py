@@ -167,6 +167,48 @@ def generate_config(config_file, template_file, schema_file):
             print("ERROR: rpki protocol \"" + rpki['name'] + "\" has invalid IP \"" + rpki['ip'] + "\"")
             sys.exit(1)
 
+    for route in config['static_routes_v4']['routes']:
+        # exactly one of {blackhole,next_hop} should be defined
+        if (not "blackhole" in route and not "next_hop" in route) or ("blackhole" in route and "next_hop" in route):
+            print("ERROR: static IPv4 route for \"" + route['destination'] + "\" must define exactly one of blackhole,next_hop")
+            sys.exit(1)
+        
+        # destination and next_hop (if it exists) should be valid
+        try:
+            prefix_parsed = ipaddress.IPv4Network(route['destination'], strict=True)
+        except ValueError:
+            print("ERROR: static IPv4 route destination \"" + route['destination'] + "\" is not valid")
+            sys.exit(1)
+
+        # next_hop (if it exists) should be valid
+        if "next_hop" in route:
+            try:
+                ipaddress.IPv4Address(route['next_hop'])
+            except ValueError:
+                print("ERROR: static IPv4 route \"" + route['destination'] + "\" has invalid next_hop \"" + route['next_hop'] + "\"")
+                sys.exit(1)
+
+    for route in config['static_routes_v6']['routes']:
+        # exactly one of {blackhole,next_hop} should be defined
+        if (not "blackhole" in route and not "next_hop" in route) or ("blackhole" in route and "next_hop" in route):
+            print("ERROR: static IPv6 route for \"" + route['destination'] + "\" must define exactly one of blackhole,next_hop")
+            sys.exit(1)
+        
+        # destination should be valid
+        try:
+            prefix_parsed = ipaddress.IPv6Network(route['destination'], strict=True)
+        except ValueError:
+            print("ERROR: static IPv6 route destination \"" + route['destination'] + "\" is not valid")
+            sys.exit(1)
+
+        # next_hop (if it exists) should be valid
+        if "next_hop" in route:
+            try:
+                ipaddress.IPv6Address(route['next_hop'])
+            except ValueError:
+                print("ERROR: static IPv6 route \"" + route['destination'] + "\" has invalid next_hop \"" + route['next_hop'] + "\"")
+                sys.exit(1)
+
     # render template
     t = Template(template_text)
 
