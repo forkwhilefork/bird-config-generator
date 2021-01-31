@@ -167,7 +167,7 @@ def generate_config(config_file, template_file, schema_file):
             print("ERROR: rpki protocol \"" + rpki['name'] + "\" has invalid IP \"" + rpki['ip'] + "\"")
             sys.exit(1)
 
-    for route in config['static_routes_v4.routes']:
+    for route in config['static_routes_v4']['routes']:
         # exactly one of {blackhole,next-hop} should be defined
         if (not "blackhole" in route and not "next-hop" in route) or ("blackhole" in route and "next-hop" in route):
             print("ERROR: static IPv4 route for \"" + route['destination'] + "\" must define exactly one of blackhole,next-hop")
@@ -188,7 +188,7 @@ def generate_config(config_file, template_file, schema_file):
                 print("ERROR: static IPv4 route \"" + route['destination'] + "\" has invalid next-hop \"" + route['next-hop'] + "\"")
                 sys.exit(1)
 
-    for route in config['static_routes_v6.routes']:
+    for route in config['static_routes_v6']['routes']:
         # exactly one of {blackhole,next-hop} should be defined
         if (not "blackhole" in route and not "next-hop" in route) or ("blackhole" in route and "next-hop" in route):
             print("ERROR: static IPv6 route for \"" + route['destination'] + "\" must define exactly one of blackhole,next-hop")
