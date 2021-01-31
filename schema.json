@@ -189,7 +189,8 @@
                 }
             },
             "required": [
-                "routes"
+                "routes",
+                "filter_name"
             ]
         },
         "static_routes_v6":{

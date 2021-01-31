@@ -1,3 +1,35 @@
+{% if config.static_routes_v4 is defined %}
+    protocol static static_v4 {
+        ipv4 {
+            import filter {{ config.static_routes_v4.filter_name }};
+        };
+
+        {% for route in config.static_routes_v4.routes %}
+            {% if route.blackhole %}
+                route {{ route.destination }} reject;
+            {% else %}
+                route {{ route.destination }} via {{ route.next-hop }};
+            {% endif %}
+        {% endfor %}
+    }
+{% endif %}
+
+{% if config.static_routes_v6 is defined %}
+    protocol static static_v6 {
+        ipv6 {
+            import filter {{ config.static_routes_v6.filter_name }};
+        };
+
+        {% for route in config.static_routes_v6.routes %}
+            {% if route.blackhole %}
+                route {{ route.destination }} reject;
+            {% else %}
+                route {{ route.destination }} via {{ route.next-hop }};
+            {% endif %}
+        {% endfor %}
+    }
+{% endif %}
+
 {% for rpki in config.rpki_protocols %}
     protocol rpki {{ rpki.name }} {
         roa4 { table {{ rpki.roa4_table }}; };
