@@ -61,7 +61,8 @@
                                 "items":{
                                     "type":"string"
                                 },
-                                "uniqueItems":true
+                                "uniqueItems":true,
+                                "minItems":1
                             },
                             "prefix_limit":{
                                 "type":"integer"
@@ -88,7 +89,8 @@
                                 "items":{
                                     "type":"string"
                                 },
-                                "uniqueItems":true
+                                "uniqueItems":true,
+                                "minItems":1
                             },
                             "prefix_limit":{
                                 "type":"integer"
