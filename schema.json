@@ -70,7 +70,8 @@
                         },
                         "required":[
                             "peer_ip"
-                        ]
+                        ],
+                        "additionalProperties": false
                     },
                     "ipv6":{
                         "type":"object",
@@ -98,7 +99,8 @@
                         },
                         "required":[
                             "peer_ip"
-                        ]
+                        ],
+                        "additionalProperties": false
                     },
                     "filtering_method":{
                         "type":"string",
@@ -116,7 +118,8 @@
                 "required":[
                     "name",
                     "type"
-                ]
+                ],
+                "additionalProperties": false
             },
             "minItems":1,
             "uniqueItems":true
@@ -163,7 +166,8 @@
                 "required": [
                     "name",
                     "ip"
-                ]
+                ],
+                "additionalProperties": false
             }
         },
         "static_routes_v4":{
@@ -189,14 +193,16 @@
                         },
                         "required": [
                             "destination"
-                        ]
+                        ],
+                        "additionalProperties": false
                     }
                 }
             },
             "required": [
                 "routes",
                 "filter_name"
-            ]
+            ],
+            "additionalProperties": false
         },
         "static_routes_v6":{
             "type":"object",
@@ -221,16 +227,19 @@
                         },
                         "required": [
                             "destination"
-                        ]
+                        ],
+                        "additionalProperties": false
                     }
                 }
             },
             "required": [
                 "routes"
-            ]
+            ],
+            "additionalProperties": false
         }
     },
     "required":[
         "hostname"
-    ]
+    ],
+    "additionalProperties": false
 }
