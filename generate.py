@@ -233,14 +233,12 @@ if __name__ == "__main__":
     parser=argparse.ArgumentParser()
 
     parser.add_argument('--config', help='json file with information used to generate router config', type=str, required=True, default='config.json')
-    parser.add_argument('--template', help='jinja2 template providing the config structure', type=str, required=True, default='template.jinja2')
-    parser.add_argument('--schema', help='json schema used to validate the config file', type=str, required=True, default='schema.json')
     parser.add_argument('--outputPath', help='path of generated file', type=str, required=True, default='.')
     parser.add_argument('--dryRun', help='check config validity but do not generate any files', type=bool, default=False)
 
     args=parser.parse_args()
 
-    output = generate_config(args.config, args.template, args.schema)
+    output = generate_config(args.config, os.path.join(os.path.dirname(os.path.realpath(__file__)), "template.jinja2"), os.path.join(os.path.dirname(os.path.realpath(__file__)), "schema.json"))
     if not args.dryRun:
         with open(args.outputPath, 'w') as writer:
             writer.write(output)
