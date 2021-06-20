@@ -1,6 +1,6 @@
 from jinja2 import Template
 from jsonschema import validate
-import argparse, ipaddress, json, os, re, sys
+import argparse, ipaddress, json, os, re, sys, difflib
 
 # What to indent with
 INDENT_WITH = " " * 4 # 4 spaces
@@ -25,6 +25,37 @@ def bird_indent(conf):
             level += 1
    
     return(out)
+
+# thanks to StackOverflow user fmark (https://stackoverflow.com/a/3041990) for this function
+def query_yes_no(question, default="yes"):
+    """Ask a yes/no question via raw_input() and return their answer.
+
+    "question" is a string that is presented to the user.
+    "default" is the presumed answer if the user just hits <Enter>.
+            It must be "yes" (the default), "no" or None (meaning
+            an answer is required of the user).
+
+    The "answer" return value is True for "yes" or False for "no".
+    """
+    valid = {"yes": True, "y": True, "ye": True, "no": False, "n": False}
+    if default is None:
+        prompt = " [y/n] "
+    elif default == "yes":
+        prompt = " [Y/n] "
+    elif default == "no":
+        prompt = " [y/N] "
+    else:
+        raise ValueError("invalid default answer: '%s'" % default)
+
+    while True:
+        sys.stdout.write(question + prompt)
+        choice = input().lower()
+        if default is not None and choice == "":
+            return valid[default]
+        elif choice in valid:
+            return valid[choice]
+        else:
+            sys.stdout.write("Please respond with 'yes' or 'no' " "(or 'y' or 'n').\n")
 
 def generate_config(config_file, template_file, schema_file):
     with open(template_file, 'r') as file:
@@ -234,11 +265,51 @@ if __name__ == "__main__":
 
     parser.add_argument('--config', help='json file with information used to generate router config', type=str, required=True, default='config.json')
     parser.add_argument('--outputPath', help='path of generated file', type=str, required=True, default='.')
-    parser.add_argument('--dryRun', help='check config validity but do not generate any files', type=bool, default=False)
+    parser.add_argument('--mode', help='whether to overwrite the existing config. options are "dryrun", "prompt", "overwrite"', type=str, default='prompt', choices=['dryrun', 'prompt', 'overwrite'])
 
     args=parser.parse_args()
 
     output = generate_config(args.config, os.path.join(os.path.dirname(os.path.realpath(__file__)), "template.jinja2"), os.path.join(os.path.dirname(os.path.realpath(__file__)), "schema.json"))
-    if not args.dryRun:
+
+    # read existing config
+    existing_config = ''
+    file_exists = True
+    try:
+        with open(args.outputPath, 'r') as file:
+            existing_config = file.read()
+    except FileNotFoundError:
+        file_exists = False
+    else:
+        # collect changes into a list so we can count them easily
+        lines = list(difflib.unified_diff(existing_config.split("\n"), output.split("\n")))
+
+        # if there are no changes, tell the user and exit
+        if len(lines) == 0:
+            print("no changes")
+            sys.exit(0)
+        
+        # compare with output
+        for line in lines:
+            print(line)
+    
+    if args.mode == 'dryrun':
+        # just exit
+        print("mode is dryrun; exiting without writing file")
+        sys.exit(0)
+
+    write = False
+    if not file_exists:
+        # if existing config file doesn't exist, just write it
+        write = True
+        if args.mode == 'prompt':
+            print("no existing config file; skipping prompt and writing file")
+    elif args.mode == 'prompt':
+        # if existing config file does exist, and we are set to prompt, then prompt user to overwrite
+        if query_yes_no("proceed with changes?"):
+            write = True
+
+    # if we decided above to write file, or if we are in overwrite mode, then write the file
+    if write or args.mode == 'overwrite':
         with open(args.outputPath, 'w') as writer:
             writer.write(output)
+        print("wrote file")
