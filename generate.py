@@ -92,17 +92,15 @@ def generate_config(config_file, template_file, schema_file):
         if session['type'] == "customer" or session['type'] == "peer":
             if session['filtering_method'] == "irr-as-set":
                 if "as-set" in session:
-                    #TODO: generate prefix list from IRR
-                    print("filtering with IRR is not implemented yet, sorry")
-                    sys.exit(1)
+                    #TODO: validate that as-set name is sane
+                    print()
                 else:
                     print("ERROR: session \"" + session['name'] + "\" filtering method set to \"irr-as-set\". \"as-set\" must be defined.")
                     sys.exit(1)
             elif session['filtering_method'] == "irr-autnum":
-                if "as-set" in session:
-                    #TODO: generate prefix list from IRR
-                    print("filtering with IRR is not implemented yet, sorry")
-                    sys.exit(1)
+                if "autnum" in session:
+                    #TODO: validate that autnum is sane
+                    print()
                 else:
                     print("ERROR: session \"" + session['name'] + "\" filtering method set to \"irr-autnum\". \"autnum\" must be defined.")
                     sys.exit(1)
@@ -257,8 +255,17 @@ def generate_config(config_file, template_file, schema_file):
     main_output = re.sub(r'\n\s*\n', '\n', main_output)
     main_output = re.sub(r'}\n', '}\n\n', main_output)
     main_output = bird_indent(main_output)
-    
+
     cron_output = ""
+
+    for session in config['bgp_sessions']:
+        if session['type'] == "customer" or session['type'] == "peer":
+            if session['filtering_method'] == "irr-as-set":
+                cron_output += "bgpq4 -h irr.forksystems.net -b -4 -m 24 -R 24 " + session['as-set'] + " -A -l bgp_prefixes_" + session['type'] + "_" + session['name'] + "_v4 > " + os.path.join(args.outputPath, "bgp_prefixes_" + session['type'] + "_" + session['name'] + "_v4.conf") + "\n"
+                cron_output += "bgpq4 -h irr.forksystems.net -b -6 -m 48 -R 48 " + session['as-set'] + " -A -l bgp_prefixes_" + session['type'] + "_" + session['name'] + "_v6 > " + os.path.join(args.outputPath, "bgp_prefixes_" + session['type'] + "_" + session['name'] + "_v6.conf") + "\n"
+            elif session['filtering_method'] == "irr-autnum":
+                cron_output += "bgpq4 -h irr.forksystems.net -b -4 -m 24 -R 24 " + session['autnum'] + " -A -l bgp_prefixes_" + session['type'] + "_" + session['name'] + "_v4 > " + os.path.join(args.outputPath, "bgp_prefixes_" + session['type'] + "_" + session['name'] + "_v4.conf") + "\n"
+                cron_output += "bgpq4 -h irr.forksystems.net -b -6 -m 48 -R 48 " + session['autnum'] + " -A -l bgp_prefixes_" + session['type'] + "_" + session['name'] + "_v6 > " + os.path.join(args.outputPath, "bgp_prefixes_" + session['type'] + "_" + session['name'] + "_v6.conf") + "\n"
 
     return (main_output, cron_output)
 
@@ -274,6 +281,9 @@ if __name__ == "__main__":
 
     (main_output, cron_output) = generate_config(args.config, os.path.join(os.path.dirname(os.path.realpath(__file__)), "template.jinja2"), os.path.join(os.path.dirname(os.path.realpath(__file__)), "schema.json"))
 
+    print(cron_output) #TODO: remove this
+
+    #TODO: maybe need to do this diff process with the cron stuff too?
     # read existing config
     existing_config = ''
     file_exists = True
