@@ -52,6 +52,10 @@ def generate_config(config_file, template_file, schema_file):
         if " " in session['name']:
             print("ERROR: session \"" + session['name'] + "\" name must not contain spaces")
             sys.exit(1)
+        # no dashes in session name
+        if "-" in session['name']:
+            print("ERROR: session \"" + session['name'] + "\" name must not contain \"-\"")
+            sys.exit(1)
         
         # filtering is set up right
         if session['type'] == "customer" or session['type'] == "peer":
@@ -157,7 +161,11 @@ def generate_config(config_file, template_file, schema_file):
         
         # no spaces in protocol name
         if " " in rpki['name']:
-            print("ERROR: rpki protocol \"" + session['name'] + "\" name must not contain spaces")
+            print("ERROR: rpki protocol \"" + rpki['name'] + "\" name must not contain spaces")
+            sys.exit(1)
+        # no dashes in protocol name
+        if "-" in rpki['name']:
+            print("ERROR: rpki protocol \"" + rpki['name'] + "\" name must not contain \"-\"")
             sys.exit(1)
         
         # ip should be valid
