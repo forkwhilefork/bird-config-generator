@@ -251,44 +251,47 @@ def generate_config(config_file, template_file, schema_file):
     # render template
     t = Template(template_text)
 
-    output = ""
+    main_output = ""
 
-    output = t.render(config=config, trim_blocks=True, lstrip_blocks=True)
-    output = re.sub(r'\n\s*\n', '\n', output)
-    output = re.sub(r'}\n', '}\n\n', output)
-    output = bird_indent(output)
+    main_output = t.render(config=config, trim_blocks=True, lstrip_blocks=True)
+    main_output = re.sub(r'\n\s*\n', '\n', main_output)
+    main_output = re.sub(r'}\n', '}\n\n', main_output)
+    main_output = bird_indent(main_output)
     
-    return output
+    cron_output = ""
+
+    return (main_output, cron_output)
 
 if __name__ == "__main__":
     parser=argparse.ArgumentParser()
 
     parser.add_argument('--config', help='json file with information used to generate router config', type=str, required=True, default='config.json')
-    parser.add_argument('--outputPath', help='path of generated file', type=str, required=True, default='.')
+    parser.add_argument('--outputPath', help='path for generated files', type=str, default='.')
+    parser.add_argument('--outputFileName', help='name of main output file', type=str, default='output.conf')
     parser.add_argument('--mode', help='whether to overwrite the existing config. options are "dryrun", "prompt", "overwrite"', type=str, default='prompt', choices=['dryrun', 'prompt', 'overwrite'])
 
     args=parser.parse_args()
 
-    output = generate_config(args.config, os.path.join(os.path.dirname(os.path.realpath(__file__)), "template.jinja2"), os.path.join(os.path.dirname(os.path.realpath(__file__)), "schema.json"))
+    (main_output, cron_output) = generate_config(args.config, os.path.join(os.path.dirname(os.path.realpath(__file__)), "template.jinja2"), os.path.join(os.path.dirname(os.path.realpath(__file__)), "schema.json"))
 
     # read existing config
     existing_config = ''
     file_exists = True
     try:
-        with open(args.outputPath, 'r') as file:
+        with open(os.path.join(args.outputPath, args.outputFileName), 'r') as file:
             existing_config = file.read()
     except FileNotFoundError:
         file_exists = False
     else:
         # collect changes into a list so we can count them easily
-        lines = list(difflib.unified_diff(existing_config.split("\n"), output.split("\n")))
+        lines = list(difflib.unified_diff(existing_config.split("\n"), main_output.split("\n")))
 
         # if there are no changes, tell the user and exit
         if len(lines) == 0:
             print("no changes")
             sys.exit(0)
         
-        # compare with output
+        # compare with main_output
         for line in lines:
             print(line)
     
@@ -310,6 +313,6 @@ if __name__ == "__main__":
 
     # if we decided above to write file, or if we are in overwrite mode, then write the file
     if write or args.mode == 'overwrite':
-        with open(args.outputPath, 'w') as writer:
-            writer.write(output)
+        with open(os.path.join(args.outputPath, args.outputFileName), 'w') as writer:
+            writer.write(main_output)
         print("wrote file")
