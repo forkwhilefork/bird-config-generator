@@ -261,11 +261,11 @@ def generate_config(config_file, template_file, schema_file):
     for session in config['bgp_sessions']:
         if session['type'] == "customer" or session['type'] == "peer":
             if session['filtering_method'] == "irr-as-set":
-                cron_output += "bgpq4 -h irr.forksystems.net -b -4 -m 24 -R 24 " + session['as-set'] + " -A -l bgp_prefixes_" + session['type'] + "_" + session['name'] + "_v4 > " + os.path.join(args.outputPath, "bgp_prefixes_" + session['type'] + "_" + session['name'] + "_v4.conf") + "\n"
-                cron_output += "bgpq4 -h irr.forksystems.net -b -6 -m 48 -R 48 " + session['as-set'] + " -A -l bgp_prefixes_" + session['type'] + "_" + session['name'] + "_v6 > " + os.path.join(args.outputPath, "bgp_prefixes_" + session['type'] + "_" + session['name'] + "_v6.conf") + "\n"
+                cron_output += "bgpq4 -h " + config['irrd_server'] + " -b -4 -m 24 -R 24 " + session['as-set'] + " -A -l bgp_prefixes_" + session['type'] + "_" + session['name'] + "_v4 > " + os.path.join(args.outputPath, "bgp_prefixes_" + session['type'] + "_" + session['name'] + "_v4.conf") + "\n"
+                cron_output += "bgpq4 -h " + config['irrd_server'] + " -b -6 -m 48 -R 48 " + session['as-set'] + " -A -l bgp_prefixes_" + session['type'] + "_" + session['name'] + "_v6 > " + os.path.join(args.outputPath, "bgp_prefixes_" + session['type'] + "_" + session['name'] + "_v6.conf") + "\n"
             elif session['filtering_method'] == "irr-autnum":
-                cron_output += "bgpq4 -h irr.forksystems.net -b -4 -m 24 -R 24 " + session['autnum'] + " -A -l bgp_prefixes_" + session['type'] + "_" + session['name'] + "_v4 > " + os.path.join(args.outputPath, "bgp_prefixes_" + session['type'] + "_" + session['name'] + "_v4.conf") + "\n"
-                cron_output += "bgpq4 -h irr.forksystems.net -b -6 -m 48 -R 48 " + session['autnum'] + " -A -l bgp_prefixes_" + session['type'] + "_" + session['name'] + "_v6 > " + os.path.join(args.outputPath, "bgp_prefixes_" + session['type'] + "_" + session['name'] + "_v6.conf") + "\n"
+                cron_output += "bgpq4 -h " + config['irrd_server'] + " -b -4 -m 24 -R 24 " + session['autnum'] + " -A -l bgp_prefixes_" + session['type'] + "_" + session['name'] + "_v4 > " + os.path.join(args.outputPath, "bgp_prefixes_" + session['type'] + "_" + session['name'] + "_v4.conf") + "\n"
+                cron_output += "bgpq4 -h " + config['irrd_server'] + " -b -6 -m 48 -R 48 " + session['autnum'] + " -A -l bgp_prefixes_" + session['type'] + "_" + session['name'] + "_v6 > " + os.path.join(args.outputPath, "bgp_prefixes_" + session['type'] + "_" + session['name'] + "_v6.conf") + "\n"
 
     return (main_output, cron_output)
 
@@ -325,4 +325,11 @@ if __name__ == "__main__":
     if write or args.mode == 'overwrite':
         with open(os.path.join(args.outputPath, args.outputFileName), 'w') as writer:
             writer.write(main_output)
-        print("wrote file")
+        print("wrote main file")
+        if cron_output != "": #TODO: we need to do a separate check for changes on this.
+            with open('/etc/cron.d/bird_irr_filters', "r+") as f:
+                data = f.read()
+                f.seek(0)
+                f.write(cron_output)
+                f.truncate()
+            print("wrote cron file")
