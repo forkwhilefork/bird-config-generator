@@ -1,7 +1,35 @@
+filter static_in {
+
+    bgp_large_community.add((MY_AS,INFO_SOURCE,ORIGINATED));
+
+    {% for route in config.static_routes_v4.routes %}
+        {% if route.communities is defined %}
+            if net ~ [ {{ route.destination }} ] then {
+                {% for community in route.communities %}
+                    bgp_large_community.add(({{ community[0] }}, {{ community[1] }} , {{ community[2] }}));
+                {% endfor %}
+            }
+        {% endif %}
+    {% endfor %}
+
+    {% for route in config.static_routes_v6.routes %}
+        {% if route.communities is defined %}
+            if net ~ [ {{ route.destination }} ] then {
+                {% for community in route.communities %}
+                    bgp_large_community.add(({{ community[0] }}, {{ community[1] }} , {{ community[2] }}));
+                {% endfor %}
+            }
+        {% endif %}
+    {% endfor %}
+
+    accept;
+}
+
+
 {% if config.static_routes_v4 is defined %}
     protocol static static_v4 {
         ipv4 {
-            import filter {{ config.static_routes_v4.filter_name }};
+            import filter static_in;
         };
 
         {% for route in config.static_routes_v4.routes %}
@@ -17,7 +45,7 @@
 {% if config.static_routes_v6 is defined %}
     protocol static static_v6 {
         ipv6 {
-            import filter {{ config.static_routes_v6.filter_name }};
+            import filter static_in;
         };
 
         {% for route in config.static_routes_v6.routes %}

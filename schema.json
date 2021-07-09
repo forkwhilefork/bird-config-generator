@@ -173,9 +173,6 @@
         "static_routes_v4":{
             "type":"object",
             "properties":{
-                "filter_name": {
-                    "type": "string"
-                },
                 "routes": {
                     "type": "array",
                     "items":{
@@ -189,6 +186,28 @@
                             },
                             "next_hop": {
                                 "type": "string"
+                            },
+                            "communities": {
+                                "type": "array",
+                                "items":{
+                                    "items" : [
+                                        {
+                                            "type" : "integer",
+                                            "minimum": 0,
+                                            "maximum": 4294967296
+                                        }, {
+                                            "type" : "integer",
+                                            "minimum": 0,
+                                            "maximum": 4294967296
+                                        }, {
+                                            "type" : "integer",
+                                            "minimum": 0,
+                                            "maximum": 4294967296
+                                        }
+                                    ]
+                                },
+                                "uniqueItems":true,
+                                "minItems":1
                             }
                         },
                         "required": [
@@ -199,17 +218,13 @@
                 }
             },
             "required": [
-                "routes",
-                "filter_name"
+                "routes"
             ],
             "additionalProperties": false
         },
         "static_routes_v6":{
             "type":"object",
             "properties":{
-                "filter_name": {
-                    "type": "string"
-                },
                 "routes": {
                     "type": "array",
                     "items":{
@@ -223,6 +238,28 @@
                             },
                             "next_hop": {
                                 "type": "string"
+                            },
+                            "communities": {
+                                "type": "array",
+                                "items":{
+                                    "items" : [
+                                        {
+                                            "type" : "integer",
+                                            "minimum": 0,
+                                            "maximum": 4294967296
+                                        }, {
+                                            "type" : "integer",
+                                            "minimum": 0,
+                                            "maximum": 4294967296
+                                        }, {
+                                            "type" : "integer",
+                                            "minimum": 0,
+                                            "maximum": 4294967296
+                                        }
+                                    ]
+                                },
+                                "uniqueItems":true,
+                                "minItems":1
                             }
                         },
                         "required": [
