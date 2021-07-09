@@ -171,108 +171,166 @@
             }
         },
         "static_routes_v4":{
-            "type":"object",
-            "properties":{
-                "routes": {
-                    "type": "array",
-                    "items":{
-                        "type":"object",
-                        "properties":{
-                            "destination": {
-                                "type": "string"
-                            },
-                            "blackhole": {
-                                "type": "boolean"
-                            },
-                            "next_hop": {
-                                "type": "string"
-                            },
-                            "communities": {
-                                "type": "array",
-                                "items":{
-                                    "items" : [
-                                        {
-                                            "type" : "integer",
-                                            "minimum": 0,
-                                            "maximum": 4294967296
-                                        }, {
-                                            "type" : "integer",
-                                            "minimum": 0,
-                                            "maximum": 4294967296
-                                        }, {
-                                            "type" : "integer",
-                                            "minimum": 0,
-                                            "maximum": 4294967296
-                                        }
-                                    ]
-                                },
-                                "uniqueItems":true,
-                                "minItems":1
-                            }
+            "type": "array",
+            "items":{
+                "type":"object",
+                "properties":{
+                    "destination": {
+                        "type": "string"
+                    },
+                    "blackhole": {
+                        "type": "boolean"
+                    },
+                    "next_hop": {
+                        "type": "string"
+                    },
+                    "communities": {
+                        "type": "array",
+                        "items":{
+                            "items" : [
+                                {
+                                    "type" : "integer",
+                                    "minimum": 0,
+                                    "maximum": 4294967296
+                                }, {
+                                    "type" : "integer",
+                                    "minimum": 0,
+                                    "maximum": 4294967296
+                                }, {
+                                    "type" : "integer",
+                                    "minimum": 0,
+                                    "maximum": 4294967296
+                                }
+                            ]
                         },
-                        "required": [
-                            "destination"
-                        ],
-                        "additionalProperties": false
+                        "uniqueItems":true,
+                        "minItems":1
                     }
-                }
-            },
-            "required": [
-                "routes"
-            ],
-            "additionalProperties": false
+                },
+                "required": [
+                    "destination"
+                ],
+                "additionalProperties": false
+            }
         },
         "static_routes_v6":{
-            "type":"object",
-            "properties":{
-                "routes": {
-                    "type": "array",
-                    "items":{
-                        "type":"object",
-                        "properties":{
-                            "destination": {
-                                "type": "string"
-                            },
-                            "blackhole": {
-                                "type": "boolean"
-                            },
-                            "next_hop": {
-                                "type": "string"
-                            },
-                            "communities": {
-                                "type": "array",
-                                "items":{
-                                    "items" : [
-                                        {
-                                            "type" : "integer",
-                                            "minimum": 0,
-                                            "maximum": 4294967296
-                                        }, {
-                                            "type" : "integer",
-                                            "minimum": 0,
-                                            "maximum": 4294967296
-                                        }, {
-                                            "type" : "integer",
-                                            "minimum": 0,
-                                            "maximum": 4294967296
-                                        }
-                                    ]
-                                },
-                                "uniqueItems":true,
-                                "minItems":1
-                            }
+            "type": "array",
+            "items":{
+                "type":"object",
+                "properties":{
+                    "destination": {
+                        "type": "string"
+                    },
+                    "blackhole": {
+                        "type": "boolean"
+                    },
+                    "next_hop": {
+                        "type": "string"
+                    },
+                    "communities": {
+                        "type": "array",
+                        "items":{
+                            "items" : [
+                                {
+                                    "type" : "integer",
+                                    "minimum": 0,
+                                    "maximum": 4294967296
+                                }, {
+                                    "type" : "integer",
+                                    "minimum": 0,
+                                    "maximum": 4294967296
+                                }, {
+                                    "type" : "integer",
+                                    "minimum": 0,
+                                    "maximum": 4294967296
+                                }
+                            ]
                         },
-                        "required": [
-                            "destination"
-                        ],
-                        "additionalProperties": false
+                        "uniqueItems":true,
+                        "minItems":1
                     }
-                }
-            },
-            "required": [
-                "routes"
-            ],
-            "additionalProperties": false
+                },
+                "required": [
+                    "destination"
+                ],
+                "additionalProperties": false
+            }
+        },
+        "connected_route_communities":{
+            "type": "array",
+            "items":{
+                "type":"object",
+                "properties":{
+                    "destination": {
+                        "type": "string"
+                    },
+                    "communities": {
+                        "type": "array",
+                        "items":{
+                            "items" : [
+                                {
+                                    "type" : "integer",
+                                    "minimum": 0,
+                                    "maximum": 4294967296
+                                }, {
+                                    "type" : "integer",
+                                    "minimum": 0,
+                                    "maximum": 4294967296
+                                }, {
+                                    "type" : "integer",
+                                    "minimum": 0,
+                                    "maximum": 4294967296
+                                }
+                            ]
+                        },
+                        "uniqueItems":true,
+                        "minItems":1
+                    }
+                },
+                "required": [
+                    "destination",
+                    "communities"
+                ],
+                "additionalProperties": false
+            }
+        },
+        "ospf_route_communities":{
+            "type": "array",
+            "items":{
+                "type":"object",
+                "properties":{
+                    "destination": {
+                        "type": "string"
+                    },
+                    "communities": {
+                        "type": "array",
+                        "items":{
+                            "items" : [
+                                {
+                                    "type" : "integer",
+                                    "minimum": 0,
+                                    "maximum": 4294967296
+                                }, {
+                                    "type" : "integer",
+                                    "minimum": 0,
+                                    "maximum": 4294967296
+                                }, {
+                                    "type" : "integer",
+                                    "minimum": 0,
+                                    "maximum": 4294967296
+                                }
+                            ]
+                        },
+                        "uniqueItems":true,
+                        "minItems":1
+                    }
+                },
+                "required": [
+                    "destination",
+                    "communities"
+                ],
+                "additionalProperties": false
+            }
         }
     },
     "required":[
