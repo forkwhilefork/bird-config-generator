@@ -80,7 +80,7 @@ protocol direct {
 
 filter ospf_in {
 
-    {% for route in config.connected_route_communities %}
+    {% for route in config.ospf_route_communities %}
         if net ~ [ {{ route.destination }} ] then {
             {% for community in route.communities %}
                 bgp_large_community.add(({{ community[0] }}, {{ community[1] }} , {{ community[2] }}));
