@@ -92,7 +92,7 @@ filter ospf_in {
 }
 
 {% for rpki in config.rpki_protocols %}
-    protocol rpki {{ rpki.name }} {
+    protocol rpki rpki_{{ rpki.name }} {
         roa4 { table {{ rpki.roa4_table }}; };
         roa6 { table {{ rpki.roa6_table }}; };
         {% if rpki.port is defined %}
