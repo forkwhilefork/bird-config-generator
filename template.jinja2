@@ -215,6 +215,7 @@ filter ospf_in {
                         import none;
                         export filter bgp_out_{{ session.type }}_{{ session.name }};
                     {% else %}
+                        import table;
                         import keep filtered;
                         import filter bgp_in_{{ session.type }}_{{ session.name }};
                         {% if session.ipv4.prefix_limit is defined %}
@@ -260,6 +261,7 @@ filter ospf_in {
                         import none;
                         export filter bgp_out_{{ session.type }}_{{ session.name }};
                     {% else %}
+                        import table;
                         import keep filtered;
                         import filter bgp_in_{{ session.type }}_{{ session.name }};
                         {% if session.ipv6.prefix_limit is defined %}
