@@ -66,6 +66,22 @@
                             },
                             "prefix_limit":{
                                 "type":"integer"
+                            },
+                            "prefix-pref":{
+                                "type":"array",
+                                "items":{
+                                    "type":"string"
+                                },
+                                "uniqueItems":true,
+                                "minItems":1
+                            },
+                            "prefix-depref":{
+                                "type":"array",
+                                "items":{
+                                    "type":"string"
+                                },
+                                "uniqueItems":true,
+                                "minItems":1
                             }
                         },
                         "required":[
@@ -95,6 +111,22 @@
                             },
                             "prefix_limit":{
                                 "type":"integer"
+                            },
+                            "prefix-pref":{
+                                "type":"array",
+                                "items":{
+                                    "type":"string"
+                                },
+                                "uniqueItems":true,
+                                "minItems":1
+                            },
+                            "prefix-depref":{
+                                "type":"array",
+                                "items":{
+                                    "type":"string"
+                                },
+                                "uniqueItems":true,
+                                "minItems":1
                             }
                         },
                         "required":[
