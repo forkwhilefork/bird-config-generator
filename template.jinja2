@@ -203,6 +203,7 @@ filter ospf_in {
             {% endif %}
             ipv4 {
                 {% if session.stop_bgp %}
+                    import table;
                     import keep filtered;
                     import none;
                     export none;
@@ -249,6 +250,7 @@ filter ospf_in {
             {% endif %}
             ipv6 {
                 {% if session.stop_bgp %}
+                    import table;
                     import keep filtered;
                     import none;
                     export none;
