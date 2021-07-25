@@ -90,6 +90,9 @@ def generate_config(config_file, template_file, schema_file):
         
         # filtering is set up right
         if session['type'] == "customer" or session['type'] == "peer":
+            if not "filtering_method" in session:
+                print("\"filtering_method\" must be set for session of type " + session['type'])
+                sys.exit(1)
             if session['filtering_method'] == "irr-as-set":
                 if "as-set" in session:
                     #TODO: generate prefix list from IRR
