@@ -1,5 +1,5 @@
 from jinja2 import Template
-from jsonschema import validate
+import jsonschema
 import argparse, ipaddress, json, os, re, sys, difflib
 
 # What to indent with
@@ -70,7 +70,7 @@ def generate_config(config_file, template_file, schema_file):
     schema = json.loads(schema_text)
 
     # validate config against schema
-    validate(instance=config, schema=schema)
+    jsonschema.validate(instance=config, schema=schema)
 
     # validate config against "business" logic
     for session in config['bgp_sessions']:
@@ -272,7 +272,17 @@ if __name__ == "__main__":
 
     args=parser.parse_args()
 
-    output = generate_config(args.config, os.path.join(os.path.dirname(os.path.realpath(__file__)), "template.jinja2"), os.path.join(os.path.dirname(os.path.realpath(__file__)), "schema.json"))
+    try:
+        output = generate_config(args.config, os.path.join(os.path.dirname(os.path.realpath(__file__)), "template.jinja2"), os.path.join(os.path.dirname(os.path.realpath(__file__)), "schema.json"))
+    except json.decoder.JSONDecodeError:
+        print("invalid JSON")
+        sys.exit(1)
+    except jsonschema.exceptions.ValidationError as e:
+        print("ERROR: JSON does not validate against schema")
+        print(e.message)
+        print("On instance " + jsonschema._utils.format_as_index(e.relative_path))
+        print(e.instance)
+        sys.exit(1)
 
     # read existing config
     existing_config = ''
