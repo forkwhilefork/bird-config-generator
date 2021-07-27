@@ -266,9 +266,9 @@ def generate_config(config_file, template_file, schema_file):
 if __name__ == "__main__":
     parser=argparse.ArgumentParser()
 
-    parser.add_argument('--config', help='json file with information used to generate router config', type=str, required=True, default='config.json')
-    parser.add_argument('--outputPath', help='path of generated file', type=str, required=True, default='.')
-    parser.add_argument('--mode', help='whether to overwrite the existing config. options are "dryrun", "prompt", "overwrite"', type=str, default='prompt', choices=['dryrun', 'prompt', 'overwrite'])
+    parser.add_argument('--config', help='json file with information used to generate router config (default \'config.json\')', type=str, required=True, default='config.json')
+    parser.add_argument('--outputPath', help='path of generated file (default \'.\')', type=str, required=True, default='.')
+    parser.add_argument('--mode', help='whether to overwrite the existing config. options are "dryrun", "prompt", "overwrite".  (default \'prompt\')', type=str, default='prompt', choices=['dryrun', 'prompt', 'overwrite'])
 
     args=parser.parse_args()
 
