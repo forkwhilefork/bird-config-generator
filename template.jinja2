@@ -166,7 +166,10 @@ filter ospf_in {
             {% elif session.type == "peer" %}
                 bgp_large_community.add((MY_AS,INFO_SOURCE,FROM_PUBLIC_PEER));
             {% endif %}
-                bgp_large_community.add((MY_AS,INFO_AS,{{ session.asn }}));
+            bgp_large_community.add((MY_AS,INFO_AS,{{ session.asn }}));
+
+            bgp_local_pref = {{ session.local_pref }}
+
             accept;
         }
     {% endif %}
@@ -235,7 +238,6 @@ filter ospf_in {
                 neighbor {{ session.ipv4.peer_ip }} as MY_AS;
             {% else %}
                 neighbor {{ session.ipv4.peer_ip }} as {{ session.asn }};
-                default bgp_local_pref {{ session.local_pref }};
             {% endif %}
             {% if session.ipv4.source_ip is defined %}
                 source address {{ session.ipv4.source_ip }};
@@ -282,7 +284,6 @@ filter ospf_in {
                 neighbor {{ session.ipv6.peer_ip }} as MY_AS;
             {% else %}
                 neighbor {{ session.ipv6.peer_ip }} as {{ session.asn }};
-                default bgp_local_pref {{ session.local_pref }};
             {% endif %}
             {% if session.ipv6.source_ip is defined %}
                 source address {{ session.ipv6.source_ip }};

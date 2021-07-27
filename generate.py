@@ -178,13 +178,16 @@ def generate_config(config_file, template_file, schema_file):
                 print("ERROR: session \"" + session['name'] + "\" ipv6 source IP \"" + session['ipv6']['source_ip'] + "\" is not valid")
                 sys.exit(1)
 
-        # ASN and local_pref are required if session type is not internal
+        # ASN is required if session type is not internal
         if session['type'] != "internal":
             if "asn" not in session:
-                print("ERROR: session \"" + session['name'] + "\" is not type \"internal\" and therefore must have asn defined")
+                print("ERROR: session \"" + session['name'] + "\" is type \"" + session['type'] + "\" and therefore must have asn defined")
                 sys.exit(1)
+
+        # local_pref is required if session type is not internal or collector
+        if session['type'] != "internal" and session['type'] != "collector":
             if "local_pref" not in session:
-                print("ERROR: session \"" + session['name'] + "\" is not type \"internal\" and therefore must have local_pref defined")
+                print("ERROR: session \"" + session['name'] + "\" is type \"" + session['type'] + "\" and therefore must have local_pref defined")
                 sys.exit(1)
 
     for rpki in config['rpki_protocols']:
