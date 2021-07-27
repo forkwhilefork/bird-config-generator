@@ -168,7 +168,7 @@ filter ospf_in {
             {% endif %}
             bgp_large_community.add((MY_AS,INFO_AS,{{ session.asn }}));
 
-            bgp_local_pref = {{ session.local_pref }}
+            bgp_local_pref = {{ session.local_pref }};
 
             accept;
         }
