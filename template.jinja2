@@ -126,14 +126,14 @@ filter ospf_in {
             {% elif session.type == "customer" %}
                 if ( net.type = NET_IP4 ) then {
                     {% if session.ipv4 is defined %}
-                        if ! rt_import_customer({{ session.asn }}, [{{ session.ipv4.prefixes_str }}])
+                        if ! rt_import_customer({{ session.asn }}, [{{ session.ipv4.prefixes_str }}], false)
                         then reject;
                     {% else %}
                         reject;
                     {% endif %}
                 } else {
                     {% if session.ipv6 is defined %}
-                        if ! rt_import_customer({{ session.asn }}, [{{ session.ipv6.prefixes_str }}])
+                        if ! rt_import_customer({{ session.asn }}, [{{ session.ipv6.prefixes_str }}], false)
                         then reject;
                     {% else %}
                         reject;
@@ -142,14 +142,14 @@ filter ospf_in {
             {% elif session.type == "peer" %}
                 if ( net.type = NET_IP4 ) then {
                     {% if session.ipv4 is defined %}
-                        if ! rt_import_peer({{ session.asn }}, [{{ session.ipv4.prefixes_str }}])
+                        if ! rt_import_peer({{ session.asn }}, [{{ session.ipv4.prefixes_str }}], false)
                         then reject;
                     {% else %}
                         reject;
                     {% endif %}
                 } else {
                     {% if session.ipv6 is defined %}
-                        if ! rt_import_peer({{ session.asn }}, [{{ session.ipv6.prefixes_str }}])
+                        if ! rt_import_peer({{ session.asn }}, [{{ session.ipv6.prefixes_str }}], false)
                         then reject;
                     {% else %}
                         reject;
