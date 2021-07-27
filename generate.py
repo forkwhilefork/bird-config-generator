@@ -314,13 +314,11 @@ if __name__ == "__main__":
         sys.exit(0)
 
     write = False
-    if not file_exists:
-        # if existing config file doesn't exist, just write it
-        write = True
-        if args.mode == 'prompt':
-            print("no existing config file; skipping prompt and writing file")
-    elif args.mode == 'prompt':
-        # if existing config file does exist, and we are set to prompt, then prompt user to overwrite
+    if args.mode == 'prompt':
+        # if the file isn't there, tell the user
+        if not file_exists:
+            print("no existing config file")
+        # either way, prompt for confirmation
         if query_yes_no("proceed with changes?"):
             write = True
 
