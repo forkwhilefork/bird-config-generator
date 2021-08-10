@@ -1,6 +1,6 @@
 from jinja2 import Template
 import jsonschema
-import argparse, ipaddress, difflib, json, os, re, sys, wasabi
+import argparse, difflib, ipaddress, json, os, re, sys, wasabi
 
 # What to indent with
 INDENT_WITH = " " * 4 # 4 spaces
@@ -322,43 +322,55 @@ if __name__ == "__main__":
         print(e.instance)
         sys.exit(1)
 
-    # read existing config
-    existing_config = ''
-    file_exists = True
-    try:
-        with open(args.outputPath, 'r') as file:
-            existing_config = file.read()
-    except FileNotFoundError:
-        file_exists = False
-    else:
-        # collect changes into a list so we can count them easily
-        lines = list(colored_unified_diff(existing_config.split("\n"), output.split("\n"), fromfile="a/"+args.outputPath, tofile="b/"+args.outputPath, lineterm=""))
+    files_to_compare = [(args.outputPath,output)]
+    any_changes = False
 
-        # if there are no changes, tell the user and exit
-        if len(lines) == 0:
-            print("no changes")
-            sys.exit(0)
+    for path, generated in files_to_compare:
+        # read existing config
+        existing_config = ''
+        file_exists = True
+        try:
+            with open(path, 'r') as file:
+                existing_config = file.read()
+        except FileNotFoundError:
+            file_exists = False
+        else:
+            # collect changes into a list so we can count them easily
+            lines = list(colored_unified_diff(existing_config.split("\n"), generated.split("\n"), fromfile="a/"+path, tofile="b/"+path, lineterm=""))
+
+            # if there are no changes, tell the user and exit
+            if len(lines) == 0:
+                print(wasabi.color("** " + path + " has no changes", fg=11))
+                continue
+            else:
+                any_changes = True
+            
+            # compare with output
+            for line in lines:
+                print(line)
+            
+            # add a newline for readability
+            print()
         
-        # compare with output
-        for line in lines:
-            print(line)
-    
+        # if the file isn't there, tell the user
+        if not file_exists:
+            any_changes = True
+            print(wasabi.color("** " + path + " will be a new file", fg=11))
+        
+
     if args.mode == 'dryrun':
         # just exit
-        print("mode is dryrun; exiting without writing file")
+        print(wasabi.color("** mode is dryrun; exiting without writing files", fg=11))
         sys.exit(0)
 
     write = False
-    if args.mode == 'prompt':
-        # if the file isn't there, tell the user
-        if not file_exists:
-            print("no existing config file")
-        # either way, prompt for confirmation
-        if query_yes_no("proceed with changes?"):
+    if args.mode == 'prompt' and any_changes:
+        # prompt for confirmation
+        if query_yes_no(wasabi.color("** proceed with changes?", fg=11)):
             write = True
 
     # if we decided above to write file, or if we are in overwrite mode, then write the file
     if write or args.mode == 'overwrite':
         with open(args.outputPath, 'w') as writer:
             writer.write(output)
-        print("wrote file")
+        print(wasabi.color("** wrote file", fg=11))
