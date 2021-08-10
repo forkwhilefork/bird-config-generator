@@ -1,6 +1,6 @@
 from jinja2 import Template
 import jsonschema
-import argparse, ipaddress, json, os, re, sys, difflib
+import argparse, ipaddress, difflib, json, os, re, sys, wasabi
 
 # What to indent with
 INDENT_WITH = " " * 4 # 4 spaces
@@ -56,6 +56,41 @@ def query_yes_no(question, default="no"):
             return valid[choice]
         else:
             sys.stdout.write("Please respond with 'yes' or 'no' " "(or 'y' or 'n').\n")
+
+# this function is borrowed (with some small modifications) from the difflib package
+def colored_unified_diff(a, b, fromfile='', tofile='', fromfiledate='',
+                tofiledate='', n=3, lineterm='\n'):
+    difflib._check_types(a, b, fromfile, tofile, fromfiledate, tofiledate, lineterm)
+    started = False
+    for group in difflib.SequenceMatcher(None,a,b).get_grouped_opcodes(n):
+        if not started:
+            started = True
+            fromdate = '\t{}'.format(fromfiledate) if fromfiledate else ''
+            todate = '\t{}'.format(tofiledate) if tofiledate else ''
+            yield wasabi.color('--- {}{}{}'.format(fromfile, fromdate, lineterm), fg=15)
+            yield wasabi.color('+++ {}{}{}'.format(tofile, todate, lineterm), fg=15)
+
+        first, last = group[0], group[-1]
+        file1_range = difflib._format_range_unified(first[1], last[2])
+        file2_range = difflib._format_range_unified(first[3], last[4])
+        yield wasabi.color('@@ -{} +{} @@{}'.format(file1_range, file2_range, lineterm), fg="cyan")
+
+        for tag, i1, i2, j1, j2 in group:
+            if tag == 'equal':
+                for line in a[i1:i2]:
+                    yield ' ' + line
+            elif tag == 'delete':
+                for line in a[i1:i2]:
+                    yield wasabi.color('-' + line, fg="red")
+            elif tag == 'insert':
+                for line in b[j1:j2]:
+                    yield wasabi.color('+' + line, fg="green")
+            elif tag == 'replace':
+                # ideally we do something intelligent here to highlight changed words
+                for line in a[i1:i2]:
+                    yield wasabi.color('-' + line, fg="red")
+                for line in b[j1:j2]:
+                    yield wasabi.color('+' + line, fg="green")
 
 def generate_config(config_file, template_file, schema_file):
     with open(template_file, 'r') as file:
@@ -297,7 +332,7 @@ if __name__ == "__main__":
         file_exists = False
     else:
         # collect changes into a list so we can count them easily
-        lines = list(difflib.unified_diff(existing_config.split("\n"), output.split("\n")))
+        lines = list(colored_unified_diff(existing_config.split("\n"), output.split("\n"), fromfile="a/"+args.outputPath, tofile="b/"+args.outputPath, lineterm=""))
 
         # if there are no changes, tell the user and exit
         if len(lines) == 0:

@@ -8,7 +8,7 @@ This tool is not production-ready. It doesn't even have a real name. Use it at y
 ## Requirements
 python3 and some modules:
 
-`pip3 install jinja2 ipaddress jsonschema`
+`pip3 install jinja2 ipaddress difflib jsonschema wasabi`
 
 A working installation of bird2 (excluding config) is assumed.
 
