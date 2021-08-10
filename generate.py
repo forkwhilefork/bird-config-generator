@@ -1,6 +1,6 @@
 from jinja2 import Template
 import jsonschema
-import argparse, ipaddress, json, os, re, sys, difflib
+import argparse, difflib, ipaddress, json, os, re, sys, wasabi
 
 # What to indent with
 INDENT_WITH = " " * 4 # 4 spaces
@@ -56,6 +56,41 @@ def query_yes_no(question, default="no"):
             return valid[choice]
         else:
             sys.stdout.write("Please respond with 'yes' or 'no' " "(or 'y' or 'n').\n")
+
+# this function is borrowed (with some small modifications) from the difflib package
+def colored_unified_diff(a, b, fromfile='', tofile='', fromfiledate='',
+                tofiledate='', n=3, lineterm='\n'):
+    difflib._check_types(a, b, fromfile, tofile, fromfiledate, tofiledate, lineterm)
+    started = False
+    for group in difflib.SequenceMatcher(None,a,b).get_grouped_opcodes(n):
+        if not started:
+            started = True
+            fromdate = '\t{}'.format(fromfiledate) if fromfiledate else ''
+            todate = '\t{}'.format(tofiledate) if tofiledate else ''
+            yield wasabi.color('--- {}{}{}'.format(fromfile, fromdate, lineterm), fg=15)
+            yield wasabi.color('+++ {}{}{}'.format(tofile, todate, lineterm), fg=15)
+
+        first, last = group[0], group[-1]
+        file1_range = difflib._format_range_unified(first[1], last[2])
+        file2_range = difflib._format_range_unified(first[3], last[4])
+        yield wasabi.color('@@ -{} +{} @@{}'.format(file1_range, file2_range, lineterm), fg="cyan")
+
+        for tag, i1, i2, j1, j2 in group:
+            if tag == 'equal':
+                for line in a[i1:i2]:
+                    yield ' ' + line
+            elif tag == 'delete':
+                for line in a[i1:i2]:
+                    yield wasabi.color('-' + line, fg="red")
+            elif tag == 'insert':
+                for line in b[j1:j2]:
+                    yield wasabi.color('+' + line, fg="green")
+            elif tag == 'replace':
+                # ideally we do something intelligent here to highlight changed words
+                for line in a[i1:i2]:
+                    yield wasabi.color('-' + line, fg="red")
+                for line in b[j1:j2]:
+                    yield wasabi.color('+' + line, fg="green")
 
 def generate_config(config_file, template_file, schema_file):
     with open(template_file, 'r') as file:
@@ -287,43 +322,55 @@ if __name__ == "__main__":
         print(e.instance)
         sys.exit(1)
 
-    # read existing config
-    existing_config = ''
-    file_exists = True
-    try:
-        with open(args.outputPath, 'r') as file:
-            existing_config = file.read()
-    except FileNotFoundError:
-        file_exists = False
-    else:
-        # collect changes into a list so we can count them easily
-        lines = list(difflib.unified_diff(existing_config.split("\n"), output.split("\n")))
+    files_to_compare = [(args.outputPath,output)]
+    any_changes = False
 
-        # if there are no changes, tell the user and exit
-        if len(lines) == 0:
-            print("no changes")
-            sys.exit(0)
+    for path, generated in files_to_compare:
+        # read existing config
+        existing_config = ''
+        file_exists = True
+        try:
+            with open(path, 'r') as file:
+                existing_config = file.read()
+        except FileNotFoundError:
+            file_exists = False
+        else:
+            # collect changes into a list so we can count them easily
+            lines = list(colored_unified_diff(existing_config.split("\n"), generated.split("\n"), fromfile="a/"+path, tofile="b/"+path, lineterm=""))
+
+            # if there are no changes, tell the user and exit
+            if len(lines) == 0:
+                print(wasabi.color("** " + path + " has no changes", fg=11))
+                continue
+            else:
+                any_changes = True
+            
+            # compare with output
+            for line in lines:
+                print(line)
+            
+            # add a newline for readability
+            print()
         
-        # compare with output
-        for line in lines:
-            print(line)
-    
+        # if the file isn't there, tell the user
+        if not file_exists:
+            any_changes = True
+            print(wasabi.color("** " + path + " will be a new file", fg=11))
+        
+
     if args.mode == 'dryrun':
         # just exit
-        print("mode is dryrun; exiting without writing file")
+        print(wasabi.color("** mode is dryrun; exiting without writing files", fg=11))
         sys.exit(0)
 
     write = False
-    if args.mode == 'prompt':
-        # if the file isn't there, tell the user
-        if not file_exists:
-            print("no existing config file")
-        # either way, prompt for confirmation
-        if query_yes_no("proceed with changes?"):
+    if args.mode == 'prompt' and any_changes:
+        # prompt for confirmation
+        if query_yes_no(wasabi.color("** proceed with changes?", fg=11)):
             write = True
 
     # if we decided above to write file, or if we are in overwrite mode, then write the file
     if write or args.mode == 'overwrite':
         with open(args.outputPath, 'w') as writer:
             writer.write(output)
-        print("wrote file")
+        print(wasabi.color("** wrote file", fg=11))
