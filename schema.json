@@ -84,6 +84,9 @@
                             },
                             "prefix_limit":{
                                 "type":"integer"
+                            },
+                            "next_hop_self":{
+                                "type":"boolean"
                             }
                         },
                         "required":[
@@ -118,6 +121,9 @@
                             },
                             "prefix_limit":{
                                 "type":"integer"
+                            },
+                            "next_hop_self":{
+                                "type":"boolean"
                             }
                         },
                         "required":[

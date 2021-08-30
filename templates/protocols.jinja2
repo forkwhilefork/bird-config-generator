@@ -214,7 +214,6 @@ filter ospf_in {
                     {% if session.type == "internal" %}
                         import all;
                         export filter bgp_out_{{ session.type }}_{{ session.name }};
-                        next hop self;
                     {% elif session.type == "collector" %}
                         import none;
                         export filter bgp_out_{{ session.type }}_{{ session.name }};
@@ -227,6 +226,9 @@ filter ospf_in {
                         {% endif %}
                         export filter bgp_out_{{ session.type }}_{{ session.name }};
                     {% endif %}
+                {% endif %}
+                {% if session.ipv4.next_hop_self %}
+                    next hop self;
                 {% endif %}
             };
 
@@ -272,7 +274,6 @@ filter ospf_in {
                     {% if session.type == "internal" %}
                         import all;
                         export filter bgp_out_{{ session.type }}_{{ session.name }};
-                        next hop self;
                     {% elif session.type == "collector" %}
                         import none;
                         export filter bgp_out_{{ session.type }}_{{ session.name }};
@@ -285,6 +286,9 @@ filter ospf_in {
                         {% endif %}
                         export filter bgp_out_{{ session.type }}_{{ session.name }};
                     {% endif %}
+                {% endif %}
+                {% if session.ipv6.next_hop_self %}
+                    next hop self;
                 {% endif %}
             };
 
