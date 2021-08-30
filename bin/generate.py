@@ -92,21 +92,16 @@ def colored_unified_diff(a, b, fromfile='', tofile='', fromfiledate='',
                 for line in b[j1:j2]:
                     yield wasabi.color('+' + line, fg="green")
 
-def generate_config(config_file, template_file, schema_file):
-    with open(template_file, 'r') as file:
-        template_text = file.read()
+def get_json_from_file(filename):
+    with open(filename, 'r') as file:
+        text = file.read()
+    return json.loads(text)
 
-    with open(config_file, 'r') as file:
-        config_text = file.read()
-    config = json.loads(config_text)
+def get_text_from_file(filename):
+    with open(filename, 'r') as file:
+        return file.read()
 
-    with open(schema_file, 'r') as file:
-        schema_text = file.read()
-    schema = json.loads(schema_text)
-
-    # validate config against schema
-    jsonschema.validate(instance=config, schema=schema)
-
+def generate_protocol_config(config, template_text):
     # validate config against "business" logic
     for session in config['bgp_sessions']:
         # need at least one ip protocol version defined
@@ -301,6 +296,24 @@ def generate_config(config_file, template_file, schema_file):
     
     return output
 
+def generate_constants_config(config, template_text):
+    # Since ASNs are 4 bytes, and python integers are 4 bytes,
+    # we don't have to check that the ASN is in the allowed range.
+    # Note: we're not checking for bogon ASNs here. A user may want to
+    # operate with a private ASN or something.
+
+    # render template
+    t = Template(template_text)
+
+    output = ""
+
+    output = t.render(config=config, trim_blocks=True, lstrip_blocks=True)
+    output = re.sub(r'\n\s*\n', '\n', output)
+    output = re.sub(r'}\n', '}\n\n', output)
+    output = bird_indent(output)
+    
+    return output
+
 if __name__ == "__main__":
     parser=argparse.ArgumentParser()
 
@@ -310,8 +323,18 @@ if __name__ == "__main__":
 
     args=parser.parse_args()
 
+    # get absolute path of this tool
+    base_folder_path = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
+
+    # get config object
+    config = get_json_from_file(args.config)
+
+    # get schema object
+    schema = get_json_from_file(os.path.join(base_folder_path, "schema.json"))
+
     try:
-        output = generate_config(args.config, os.path.join(os.path.dirname(os.path.realpath(__file__)), "template.jinja2"), os.path.join(os.path.dirname(os.path.realpath(__file__)), "schema.json"))
+        # validate config against schema
+        jsonschema.validate(instance=config, schema=schema)
     except json.decoder.JSONDecodeError:
         print("invalid JSON")
         sys.exit(1)
@@ -321,9 +344,19 @@ if __name__ == "__main__":
         print("On instance " + jsonschema._utils.format_as_index(e.relative_path))
         print(e.instance)
         sys.exit(1)
+    
+    
+    protocols_template = get_text_from_file(os.path.join(os.path.join(base_folder_path, "templates"), "protocols.jinja2"))
+    constants_template = get_text_from_file(os.path.join(os.path.join(base_folder_path, "templates"), "constants.jinja2"))
 
-    files_to_compare = [(args.outputPath,output)]
-    any_changes = False
+    protocols_output = generate_protocol_config(config, protocols_template)
+    constants_output = generate_constants_config(config, constants_template)
+
+    files_to_compare = [
+        (os.path.join(args.outputPath, "protocols.conf"), protocols_output),
+        (os.path.join(args.outputPath, "user_constants.conf"), constants_output)
+        ]
+    files_with_changes = []
 
     for path, generated in files_to_compare:
         # read existing config
@@ -343,7 +376,7 @@ if __name__ == "__main__":
                 print(wasabi.color("** " + path + " has no changes", fg=11))
                 continue
             else:
-                any_changes = True
+                files_with_changes.append(path)
             
             # compare with output
             for line in lines:
@@ -354,7 +387,7 @@ if __name__ == "__main__":
         
         # if the file isn't there, tell the user
         if not file_exists:
-            any_changes = True
+            files_with_changes.append(path)
             print(wasabi.color("** " + path + " will be a new file", fg=11))
         
 
@@ -364,13 +397,16 @@ if __name__ == "__main__":
         sys.exit(0)
 
     write = False
-    if args.mode == 'prompt' and any_changes:
+    if args.mode == 'prompt' and len(files_with_changes)>0:
         # prompt for confirmation
         if query_yes_no(wasabi.color("** proceed with changes?", fg=11)):
             write = True
 
-    # if we decided above to write file, or if we are in overwrite mode, then write the file
+    # if we decided above to write the files, or if we are in overwrite mode, then write the files
     if write or args.mode == 'overwrite':
-        with open(args.outputPath, 'w') as writer:
-            writer.write(output)
-        print(wasabi.color("** wrote file", fg=11))
+        for path, generated in files_to_compare:
+            # only write a file if it has changed
+            if path in files_with_changes:
+                with open(path, 'w') as writer:
+                    writer.write(generated)
+                print(wasabi.color("** wrote file " + path, fg=11))
