@@ -245,6 +245,9 @@ filter ospf_in {
             {% if session.ipv4.source_ip is defined %}
                 source address {{ session.ipv4.source_ip }};
             {% endif %}
+            {% if session.asn == config.asn %}
+                rr client;
+            {% endif %}
         }
     {% endif %}
 
@@ -293,6 +296,9 @@ filter ospf_in {
             {% endif %}
             {% if session.ipv6.source_ip is defined %}
                 source address {{ session.ipv6.source_ip }};
+            {% endif %}
+            {% if session.asn == config.asn %}
+                rr client;
             {% endif %}
         }
     {% endif %}
