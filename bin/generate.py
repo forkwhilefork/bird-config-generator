@@ -373,9 +373,10 @@ if __name__ == "__main__":
 
             # if there are no changes, tell the user and exit
             if len(lines) == 0:
-                files_with_changes.append(path)
                 print(wasabi.color("** " + path + " has no changes", fg=11))
                 continue
+            else:
+                files_with_changes.append(path)
             
             # compare with output
             for line in lines:
@@ -386,7 +387,7 @@ if __name__ == "__main__":
         
         # if the file isn't there, tell the user
         if not file_exists:
-            any_changes = True
+            files_with_changes.append(path)
             print(wasabi.color("** " + path + " will be a new file", fg=11))
         
 
