@@ -11,6 +11,20 @@
         "asn":{
             "type":"integer"
         },
+        "device":{
+            "type":"object",
+            "properties":{
+                "disabled":{
+                    "type":"boolean"
+                },
+                "scan_time":{
+                    "type":"integer",
+                    "minimum":1,
+                    "maximum":65535
+                }
+            },
+            "additionalProperties": false
+        },
         "bgp_sessions":{
             "type":"array",
             "items":{

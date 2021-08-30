@@ -1,3 +1,17 @@
+{% if config.device is defined %}
+    {% if not config.device.disabled %}
+        protocol device {
+            {% if config.device.scan_time is defined %}
+                scan time {{ config.device.scan_time }};
+            {% endif %}
+        }
+    {% endif %}
+{% else %}
+    protocol device {
+        scan time 10;
+    }
+{% endif %}
+
 filter static_in {
 
     {% for route in config.static_routes_v4 %}
