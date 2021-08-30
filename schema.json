@@ -8,6 +8,9 @@
         "hostname":{
             "type":"string"
         },
+        "asn":{
+            "type":"integer"
+        },
         "bgp_sessions":{
             "type":"array",
             "items":{
@@ -334,7 +337,8 @@
         }
     },
     "required":[
-        "hostname"
+        "hostname",
+        "asn"
     ],
     "additionalProperties": false
 }
