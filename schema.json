@@ -47,11 +47,26 @@
                     "multihop":{
                         "type":"boolean"
                     },
+                    "hold_time":{
+                        "type":"integer",
+                        "minimum":0,
+                        "maximum":65535
+                    },
+                    "keepalive_time":{
+                        "type":"integer",
+                        "minimum":0,
+                        "maximum":65535
+                    },
                     "ipv4":{
                         "type":"object",
                         "properties":{
                             "peer_ip":{
                                 "type":"string"
+                            },
+                            "peer_port":{
+                                "type":"integer",
+                                "minimum":1,
+                                "maximum":65535
                             },
                             "source_ip":{
                                 "type":"string"
@@ -69,6 +84,9 @@
                             },
                             "prefix_limit":{
                                 "type":"integer"
+                            },
+                            "next_hop_self":{
+                                "type":"boolean"
                             }
                         },
                         "required":[
@@ -82,6 +100,11 @@
                             "peer_ip":{
                                 "type":"string"
                             },
+                            "peer_port":{
+                                "type":"integer",
+                                "minimum":1,
+                                "maximum":65535
+                            },
                             "source_ip":{
                                 "type":"string"
                             },
@@ -98,6 +121,9 @@
                             },
                             "prefix_limit":{
                                 "type":"integer"
+                            },
+                            "next_hop_self":{
+                                "type":"boolean"
                             }
                         },
                         "required":[

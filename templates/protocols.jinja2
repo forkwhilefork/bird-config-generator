@@ -214,7 +214,6 @@ filter ospf_in {
                     {% if session.type == "internal" %}
                         import all;
                         export filter bgp_out_{{ session.type }}_{{ session.name }};
-                        next hop self;
                     {% elif session.type == "collector" %}
                         import none;
                         export filter bgp_out_{{ session.type }}_{{ session.name }};
@@ -228,12 +227,18 @@ filter ospf_in {
                         export filter bgp_out_{{ session.type }}_{{ session.name }};
                     {% endif %}
                 {% endif %}
+                {% if session.ipv4.next_hop_self %}
+                    next hop self;
+                {% endif %}
             };
 
             {% if session.ipv4.password is defined %}
                 password "{{ session.ipv4.password }}";
             {% endif %}
             local as MY_AS;
+            {% if session.ipv4.peer_port is defined %}
+                neighbor port {{ session.ipv4.peer_port }};
+            {% endif %}
             {% if session.type == "internal" %}
                 neighbor {{ session.ipv4.peer_ip }} as MY_AS;
             {% else %}
@@ -241,6 +246,15 @@ filter ospf_in {
             {% endif %}
             {% if session.ipv4.source_ip is defined %}
                 source address {{ session.ipv4.source_ip }};
+            {% endif %}
+            {% if session.asn == config.asn %}
+                rr client;
+            {% endif %}
+            {% if session.hold_time is defined %}
+                hold time {{ session.hold_time }};
+            {% endif %}
+            {% if session.keepalive_time is defined %}
+                keepalive time {{ session.keepalive_time }};
             {% endif %}
         }
     {% endif %}
@@ -260,7 +274,6 @@ filter ospf_in {
                     {% if session.type == "internal" %}
                         import all;
                         export filter bgp_out_{{ session.type }}_{{ session.name }};
-                        next hop self;
                     {% elif session.type == "collector" %}
                         import none;
                         export filter bgp_out_{{ session.type }}_{{ session.name }};
@@ -274,12 +287,18 @@ filter ospf_in {
                         export filter bgp_out_{{ session.type }}_{{ session.name }};
                     {% endif %}
                 {% endif %}
+                {% if session.ipv6.next_hop_self %}
+                    next hop self;
+                {% endif %}
             };
 
             {% if session.ipv6.password is defined %}
                 password "{{ session.ipv6.password }}";
             {% endif %}
             local as MY_AS;
+            {% if session.ipv6.peer_port is defined %}
+                neighbor port {{ session.ipv6.peer_port }};
+            {% endif %}
             {% if session.type == "internal" %}
                 neighbor {{ session.ipv6.peer_ip }} as MY_AS;
             {% else %}
@@ -287,6 +306,15 @@ filter ospf_in {
             {% endif %}
             {% if session.ipv6.source_ip is defined %}
                 source address {{ session.ipv6.source_ip }};
+            {% endif %}
+            {% if session.asn == config.asn %}
+                rr client;
+            {% endif %}
+            {% if session.hold_time is defined %}
+                hold time {{ session.hold_time }};
+            {% endif %}
+            {% if session.keepalive_time is defined %}
+                keepalive time {{ session.keepalive_time }};
             {% endif %}
         }
     {% endif %}
