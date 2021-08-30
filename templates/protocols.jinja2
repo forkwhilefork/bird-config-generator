@@ -234,6 +234,9 @@ filter ospf_in {
                 password "{{ session.ipv4.password }}";
             {% endif %}
             local as MY_AS;
+            {% if session.ipv4.peer_port is defined %}
+                local port {{ session.ipv4.peer_port }};
+            {% endif %}
             {% if session.type == "internal" %}
                 neighbor {{ session.ipv4.peer_ip }} as MY_AS;
             {% else %}
@@ -280,6 +283,9 @@ filter ospf_in {
                 password "{{ session.ipv6.password }}";
             {% endif %}
             local as MY_AS;
+            {% if session.ipv6.peer_port is defined %}
+                local port {{ session.ipv6.peer_port }};
+            {% endif %}
             {% if session.type == "internal" %}
                 neighbor {{ session.ipv6.peer_ip }} as MY_AS;
             {% else %}
