@@ -1,5 +1,6 @@
 {
     "hostname": "example_router",
+    "asn": 64512,
     "bgp_sessions": [
         {
             "name": "my_other_router",
