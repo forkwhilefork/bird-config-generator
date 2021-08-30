@@ -47,6 +47,16 @@
                     "multihop":{
                         "type":"boolean"
                     },
+                    "hold_time":{
+                        "type":"integer",
+                        "minimum":0,
+                        "maximum":65535
+                    },
+                    "keepalive_time":{
+                        "type":"integer",
+                        "minimum":0,
+                        "maximum":65535
+                    },
                     "ipv4":{
                         "type":"object",
                         "properties":{

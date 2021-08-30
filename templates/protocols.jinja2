@@ -248,6 +248,12 @@ filter ospf_in {
             {% if session.asn == config.asn %}
                 rr client;
             {% endif %}
+            {% if session.hold_time is defined %}
+                hold time {{ session.hold_time }};
+            {% endif %}
+            {% if session.keepalive_time is defined %}
+                keepalive time {{ session.keepalive_time }};
+            {% endif %}
         }
     {% endif %}
 
@@ -299,6 +305,12 @@ filter ospf_in {
             {% endif %}
             {% if session.asn == config.asn %}
                 rr client;
+            {% endif %}
+            {% if session.hold_time is defined %}
+                hold time {{ session.hold_time }};
+            {% endif %}
+            {% if session.keepalive_time is defined %}
+                keepalive time {{ session.keepalive_time }};
             {% endif %}
         }
     {% endif %}
