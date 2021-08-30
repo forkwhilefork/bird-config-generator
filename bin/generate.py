@@ -297,9 +297,10 @@ def generate_protocol_config(config, template_text):
     return output
 
 def generate_constants_config(config, template_text):
-    # validate that ASN is in allowed range
-    # not checking for bogon ASNs here, just that it's syntactically valid
-    #TODO: this
+    # Since ASNs are 4 bytes, and python integers are 4 bytes,
+    # we don't have to check that the ASN is in the allowed range.
+    # Note: we're not checking for bogon ASNs here. A user may want to
+    # operate with a private ASN or something.
 
     # render template
     t = Template(template_text)
