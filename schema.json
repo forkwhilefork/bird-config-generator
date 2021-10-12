@@ -52,6 +52,7 @@
                         "enum":[
                             "customer",
                             "peer",
+                            "route_server",
                             "transit",
                             "collector",
                             "internal"
