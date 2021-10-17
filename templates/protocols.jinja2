@@ -371,7 +371,7 @@ filter ospf_in {
             {% if session.keepalive_time is defined %}
                 keepalive time {{ session.keepalive_time }};
             {% endif %}
-            {% if session.type != "route_server" %}
+            {% if session.type != "route_server" and session.type != "internal" %}
                 enforce first as;
             {% endif %}
         }
