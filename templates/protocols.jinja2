@@ -233,8 +233,18 @@ filter ospf_in {
                 {% if session.backup %}
                     bgp_path.prepend(MY_AS);
                 {% endif %}
-            {% elif session.type == "customer" or session.type == "collector"%}
-                if ! export_customer() then reject;
+            {% elif session.type == "customer" %}
+                {% if session.export_policy == "default_only" %}
+                    if ! export_customer_default() then reject;
+                {% elif session.export_policy == "full_routes" %}
+                    if ! export_customer_full(false) then reject;
+                {% elif session.export_policy == "full_routes_plus_default" %}
+                    if ! export_customer_full(true) then reject;
+                {% else %}
+                    reject;
+                {% endif %}
+            {% elif session.type == "collector" %}
+                if ! export_customer_full(false) then reject;
             {% elif session.type == "peer" %}
                 if ! export_peer() then reject;
             {% endif %}

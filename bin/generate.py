@@ -113,6 +113,7 @@ def generate_protocol_config(config, template_text):
         if " " in session['name']:
             print("ERROR: session \"" + session['name'] + "\" name must not contain spaces")
             sys.exit(1)
+        
         # no dashes in session name
         if "-" in session['name']:
             print("ERROR: session \"" + session['name'] + "\" name must not contain \"-\"")
@@ -218,6 +219,16 @@ def generate_protocol_config(config, template_text):
         if session['type'] != "internal" and session['type'] != "collector":
             if "local_pref" not in session:
                 print("ERROR: session \"" + session['name'] + "\" is type \"" + session['type'] + "\" and therefore must have local_pref defined")
+                sys.exit(1)
+
+        # export_policy must be set iff session type is customer
+        if session['type'] == "customer":
+            if "export_policy" not in session:
+                print("ERROR: session \"" + session['name'] + "\" is type \"" + session['type'] + "\" and therefore must have export_policy defined")
+                sys.exit(1)
+        else:
+            if "export_policy" in session:
+                print("ERROR: session \"" + session['name'] + "\" is type \"" + session['type'] + "\" and therefore must not have export_policy defined")
                 sys.exit(1)
 
     for rpki in config['rpki_protocols']:
