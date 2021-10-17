@@ -55,7 +55,7 @@ filter static_in {
         {% if route.communities is defined %}
             if net ~ [ {{ route.destination }} ] then {
                 {% for community in route.communities %}
-                    bgp_large_community.add(({{ community[0] }}, {{ community[1] }} , {{ community[2] }}));
+                    bgp_large_community.add(({{ community[0] }}, {{ community[1] }}, {{ community[2] }}));
                 {% endfor %}
             }
         {% endif %}
@@ -65,7 +65,7 @@ filter static_in {
         {% if route.communities is defined %}
             if net ~ [ {{ route.destination }} ] then {
                 {% for community in route.communities %}
-                    bgp_large_community.add(({{ community[0] }}, {{ community[1] }} , {{ community[2] }}));
+                    bgp_large_community.add(({{ community[0] }}, {{ community[1] }}, {{ community[2] }}));
                 {% endfor %}
             }
         {% endif %}
@@ -172,42 +172,7 @@ filter ospf_in {
 {% for session in config.bgp_sessions %}
     {% if session.type != "internal" and session.type != "collector" %}
         filter bgp_in_{{ session.type }}_{{ session.name }} {
-            {% if session.type == "transit" %}
-                if ! rt_import_transit({{ session.asn }}) then reject;
-            {% elif session.type == "customer" %}
-                if ( net.type = NET_IP4 ) then {
-                    {% if session.ipv4 is defined %}
-                        if ! rt_import_customer({{ session.asn }}, [{{ session.ipv4.prefixes_str }}], false)
-                        then reject;
-                    {% else %}
-                        reject;
-                    {% endif %}
-                } else {
-                    {% if session.ipv6 is defined %}
-                        if ! rt_import_customer({{ session.asn }}, [{{ session.ipv6.prefixes_str }}], false)
-                        then reject;
-                    {% else %}
-                        reject;
-                    {% endif %}
-                }
-            {% elif session.type == "peer" %}
-                if ( net.type = NET_IP4 ) then {
-                    {% if session.ipv4 is defined %}
-                        if ! rt_import_peer({{ session.asn }}, [{{ session.ipv4.prefixes_str }}], false)
-                        then reject;
-                    {% else %}
-                        reject;
-                    {% endif %}
-                } else {
-                    {% if session.ipv6 is defined %}
-                        if ! rt_import_peer({{ session.asn }}, [{{ session.ipv6.prefixes_str }}], false)
-                        then reject;
-                    {% else %}
-                        reject;
-                    {% endif %}
-                }
-            {% endif %}
-
+            bgp_large_community.delete([(MY_AS, INFO_FILTER_REASON, *)]);
             bgp_large_community.delete([(MY_AS, INFO_SOURCE, *)]);
             bgp_large_community.delete([(MY_AS, INFO_AS, *)]);
             {% if session.type == "transit" %}
@@ -219,36 +184,82 @@ filter ospf_in {
             {% endif %}
             bgp_large_community.add((MY_AS,INFO_AS,{{ session.asn }}));
 
+            {% if session.type == "transit" %}
+                if ! import_transit() then reject;
+            {% elif session.type == "customer" %}
+                if ( net.type = NET_IP4 ) then {
+                    {% if session.ipv4 is defined %}
+                        if ! import_customer([{{ session.ipv4.prefixes_str }}])
+                        then reject;
+                    {% else %}
+                        reject;
+                    {% endif %}
+                } else {
+                    {% if session.ipv6 is defined %}
+                        if ! import_customer([{{ session.ipv6.prefixes_str }}])
+                        then reject;
+                    {% else %}
+                        reject;
+                    {% endif %}
+                }
+            {% elif session.type == "peer" %}
+                if ( net.type = NET_IP4 ) then {
+                    {% if session.ipv4 is defined %}
+                        if ! import_peer([{{ session.ipv4.prefixes_str }}])
+                        then reject;
+                    {% else %}
+                        reject;
+                    {% endif %}
+                } else {
+                    {% if session.ipv6 is defined %}
+                        if ! import_peer([{{ session.ipv6.prefixes_str }}])
+                        then reject;
+                    {% else %}
+                        reject;
+                    {% endif %}
+                }
+            {% endif %}
+
             bgp_local_pref = {{ session.local_pref }};
 
             accept;
         }
     {% endif %}
 
-    filter bgp_out_{{ session.type }}_{{ session.name }} {
-        {% if session.type == "transit" %}
-            if ! rt_export_transit() then reject;
-            {% if session.backup %}
-                bgp_path.prepend(MY_AS);
+    {% if session.type != "internal" %}
+        filter bgp_out_{{ session.type }}_{{ session.name }} {
+            {% if session.type == "transit" %}
+                if ! export_transit() then reject;
+                {% if session.backup %}
+                    bgp_path.prepend(MY_AS);
+                {% endif %}
+            {% elif session.type == "customer" %}
+                {% if session.export_policy == "default_only" %}
+                    if ! export_customer_default() then reject;
+                {% elif session.export_policy == "full_routes" %}
+                    if ! export_customer_full(false) then reject;
+                {% elif session.export_policy == "full_routes_plus_default" %}
+                    if ! export_customer_full(true) then reject;
+                {% else %}
+                    reject;
+                {% endif %}
+            {% elif session.type == "collector" %}
+                if ! export_customer_full(false) then reject;
+            {% elif session.type == "peer" %}
+                if ! export_peer() then reject;
             {% endif %}
-        {% elif session.type == "customer" or session.type == "collector" or session.type == "internal" %}
-            if ! rt_export_customer() then reject;
-        {% elif session.type == "peer" %}
-            if ! rt_export_peer() then reject;
-        {% endif %}
 
-        {% if session.type != "internal" %}
             apply_export_communities({{ session.asn }});
-        {% endif %}
 
-        {% if session.prepends is defined %}
-            {% for n in range(session.prepends) %}
-                bgp_path.prepend(MY_AS);
-            {% endfor %}
-        {% endif %}
+            {% if session.prepends is defined %}
+                {% for n in range(session.prepends) %}
+                    bgp_path.prepend(MY_AS);
+                {% endfor %}
+            {% endif %}
 
-        accept;
-    }
+            accept;
+        }
+    {% endif %}
 
     {% if session.ipv4 is defined %}
         protocol bgp bgp_{{ session.type }}_{{ session.name }}_v4 {
@@ -264,7 +275,7 @@ filter ospf_in {
                 {% else %}
                     {% if session.type == "internal" %}
                         import all;
-                        export filter bgp_out_{{ session.type }}_{{ session.name }};
+                        export all;
                     {% elif session.type == "collector" %}
                         import none;
                         export filter bgp_out_{{ session.type }}_{{ session.name }};
@@ -307,6 +318,9 @@ filter ospf_in {
             {% if session.keepalive_time is defined %}
                 keepalive time {{ session.keepalive_time }};
             {% endif %}
+            {% if session.type != "route_server" and session.type != "internal" %}
+                enforce first as;
+            {% endif %}
         }
     {% endif %}
 
@@ -324,7 +338,7 @@ filter ospf_in {
                 {% else %}
                     {% if session.type == "internal" %}
                         import all;
-                        export filter bgp_out_{{ session.type }}_{{ session.name }};
+                        export all;
                     {% elif session.type == "collector" %}
                         import none;
                         export filter bgp_out_{{ session.type }}_{{ session.name }};
@@ -366,6 +380,9 @@ filter ospf_in {
             {% endif %}
             {% if session.keepalive_time is defined %}
                 keepalive time {{ session.keepalive_time }};
+            {% endif %}
+            {% if session.type != "route_server" and session.type != "internal" %}
+                enforce first as;
             {% endif %}
         }
     {% endif %}

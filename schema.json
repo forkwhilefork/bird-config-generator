@@ -52,6 +52,7 @@
                         "enum":[
                             "customer",
                             "peer",
+                            "route_server",
                             "transit",
                             "collector",
                             "internal"
@@ -74,6 +75,14 @@
                     },
                     "multihop":{
                         "type":"boolean"
+                    },
+                    "export_policy":{
+                        "type":"string",
+                        "enum":[
+                            "default_only",
+                            "full_routes",
+                            "full_routes_plus_default"
+                        ]
                     },
                     "hold_time":{
                         "type":"integer",
