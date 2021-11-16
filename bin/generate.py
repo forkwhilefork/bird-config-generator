@@ -231,25 +231,6 @@ def generate_protocol_config(config, template_text):
                 print("ERROR: session \"" + session['name'] + "\" is type \"" + session['type'] + "\" and therefore must not have export_policy defined")
                 sys.exit(1)
 
-        # validate BGP communities
-        if "communities_for_announced_routes" in session:
-            for comm in session["communities_for_announced_routes"]:
-                # need at least one of {communities,large_communities}
-                if ("communities" not in comm) and ("large_communities" not in comm):
-                    print("ERROR: session \"" + session['name'] + "\" \"communities_for_announced_routes\" specifies prefix \"" + comm["prefix"] + "\" but no communities")
-                    sys.exit(1)
-                # prefix must be valid prefix or "all"
-                if comm["prefix"] != "all":
-                    try:
-                        ipaddress.IPv4Network(comm["prefix"] , strict=True)
-                    except ValueError:
-                        try:
-                            ipaddress.IPv6Network(comm["prefix"] , strict=True)
-                        except ValueError:
-                            print("ERROR: session \"" + session['name'] + "\" \"communities_for_announced_routes\" specifies prefix \"" + comm["prefix"] + "\" which is not valid")
-                            sys.exit(1)
-
-
     for rpki in config['rpki_protocols']:
         # need at least one roa table version defined
         if not "roa4_table" in rpki and not "roa6_table" in rpki:
