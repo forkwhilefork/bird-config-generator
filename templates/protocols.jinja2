@@ -251,6 +251,28 @@ filter ospf_in {
 
             apply_export_communities({{ session.asn }});
 
+            {% if session.communities_for_announced_routes is defined %}
+                {% for comm in session.communities_for_announced_routes %}
+                    {% if comm.prefix == "all" %}
+                        {% for community in comm.communities %}
+                            bgp_community.add(({{ community[0] }}, {{ community[1] }}));
+                        {% endfor %}
+                        {% for community in comm.large_communities %}
+                            bgp_large_community.add(({{ community[0] }}, {{ community[1] }} , {{ community[2] }}));
+                        {% endfor %}
+                    {% else %}
+                        if net ~ [ {{ comm.prefix }} ] then {
+                            {% for community in comm.communities %}
+                                bgp_community.add(({{ community[0] }}, {{ community[1] }}));
+                            {% endfor %}
+                            {% for community in comm.large_communities %}
+                                bgp_large_community.add(({{ community[0] }}, {{ community[1] }} , {{ community[2] }}));
+                            {% endfor %}
+                        }
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+
             {% if session.prepends is defined %}
                 {% for n in range(session.prepends) %}
                     bgp_path.prepend(MY_AS);
