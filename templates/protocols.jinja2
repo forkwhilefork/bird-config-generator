@@ -52,19 +52,26 @@
 filter static_in {
 
     {% for route in config.static_routes_v4 %}
-        {% if route.communities is defined %}
+        {% if route.communities is defined or route.large_communities is defined %}
             if net ~ [ {{ route.destination }} ] then {
                 {% for community in route.communities %}
+                    bgp_community.add(({{ community[0] }}, {{ community[1] }}));
+                {% endfor %}
+                {% for community in route.large_communities %}
                     bgp_large_community.add(({{ community[0] }}, {{ community[1] }}, {{ community[2] }}));
                 {% endfor %}
             }
         {% endif %}
+        
     {% endfor %}
 
     {% for route in config.static_routes_v6 %}
-        {% if route.communities is defined %}
+        {% if route.communities is defined or route.large_communities is defined %}
             if net ~ [ {{ route.destination }} ] then {
                 {% for community in route.communities %}
+                    bgp_community.add(({{ community[0] }}, {{ community[1] }}));
+                {% endfor %}
+                {% for community in route.large_communities %}
                     bgp_large_community.add(({{ community[0] }}, {{ community[1] }}, {{ community[2] }}));
                 {% endfor %}
             }
@@ -111,7 +118,10 @@ filter direct_in {
     {% for route in config.connected_route_communities %}
         if net ~ [ {{ route.destination }} ] then {
             {% for community in route.communities %}
-                bgp_large_community.add(({{ community[0] }}, {{ community[1] }} , {{ community[2] }}));
+                bgp_community.add(({{ community[0] }}, {{ community[1] }}));
+            {% endfor %}
+            {% for community in route.large_communities %}
+                bgp_large_community.add(({{ community[0] }}, {{ community[1] }}, {{ community[2] }}));
             {% endfor %}
         }
     {% endfor %}
@@ -134,7 +144,10 @@ filter ospf_in {
     {% for route in config.ospf_route_communities %}
         if net ~ [ {{ route.destination }} ] then {
             {% for community in route.communities %}
-                bgp_large_community.add(({{ community[0] }}, {{ community[1] }} , {{ community[2] }}));
+                bgp_community.add(({{ community[0] }}, {{ community[1] }}));
+            {% endfor %}
+            {% for community in route.large_communities %}
+                bgp_large_community.add(({{ community[0] }}, {{ community[1] }}, {{ community[2] }}));
             {% endfor %}
         }
     {% endfor %}
@@ -220,6 +233,28 @@ filter ospf_in {
                 }
             {% endif %}
 
+            {% if session.communities_on_ingress is defined %}
+                {% for comm in session.communities_on_ingress %}
+                    {% if comm.prefix == "all" %}
+                        {% for community in comm.communities %}
+                            bgp_community.add(({{ community[0] }}, {{ community[1] }}));
+                        {% endfor %}
+                        {% for community in comm.large_communities %}
+                            bgp_large_community.add(({{ community[0] }}, {{ community[1] }}, {{ community[2] }}));
+                        {% endfor %}
+                    {% else %}
+                        if net ~ [ {{ comm.prefix }} ] then {
+                            {% for community in comm.communities %}
+                                bgp_community.add(({{ community[0] }}, {{ community[1] }}));
+                            {% endfor %}
+                            {% for community in comm.large_communities %}
+                                bgp_large_community.add(({{ community[0] }}, {{ community[1] }}, {{ community[2] }}));
+                            {% endfor %}
+                        }
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+
             bgp_local_pref = {{ session.local_pref }};
 
             accept;
@@ -251,14 +286,14 @@ filter ospf_in {
 
             apply_export_communities({{ session.asn }});
 
-            {% if session.communities_for_announced_routes is defined %}
-                {% for comm in session.communities_for_announced_routes %}
+            {% if session.communities_on_egress is defined %}
+                {% for comm in session.communities_on_egress %}
                     {% if comm.prefix == "all" %}
                         {% for community in comm.communities %}
                             bgp_community.add(({{ community[0] }}, {{ community[1] }}));
                         {% endfor %}
                         {% for community in comm.large_communities %}
-                            bgp_large_community.add(({{ community[0] }}, {{ community[1] }} , {{ community[2] }}));
+                            bgp_large_community.add(({{ community[0] }}, {{ community[1] }}, {{ community[2] }}));
                         {% endfor %}
                     {% else %}
                         if net ~ [ {{ comm.prefix }} ] then {
@@ -266,7 +301,7 @@ filter ospf_in {
                                 bgp_community.add(({{ community[0] }}, {{ community[1] }}));
                             {% endfor %}
                             {% for community in comm.large_communities %}
-                                bgp_large_community.add(({{ community[0] }}, {{ community[1] }} , {{ community[2] }}));
+                                bgp_large_community.add(({{ community[0] }}, {{ community[1] }}, {{ community[2] }}));
                             {% endfor %}
                         }
                     {% endif %}
