@@ -55,17 +55,24 @@ filter static_in {
         {% if route.communities is defined %}
             if net ~ [ {{ route.destination }} ] then {
                 {% for community in route.communities %}
-                    bgp_large_community.add(({{ community[0] }}, {{ community[1] }}, {{ community[2] }}));
+                    bgp_community.add(({{ community[0] }}, {{ community[1] }}));
+                {% endfor %}
+                {% for community in route.large_communities %}
+                    bgp_large_community.add(({{ community[0] }}, {{ community[1] }} , {{ community[2] }}));
                 {% endfor %}
             }
         {% endif %}
+        
     {% endfor %}
 
     {% for route in config.static_routes_v6 %}
         {% if route.communities is defined %}
             if net ~ [ {{ route.destination }} ] then {
                 {% for community in route.communities %}
-                    bgp_large_community.add(({{ community[0] }}, {{ community[1] }}, {{ community[2] }}));
+                    bgp_community.add(({{ community[0] }}, {{ community[1] }}));
+                {% endfor %}
+                {% for community in route.large_communities %}
+                    bgp_large_community.add(({{ community[0] }}, {{ community[1] }} , {{ community[2] }}));
                 {% endfor %}
             }
         {% endif %}
@@ -111,6 +118,9 @@ filter direct_in {
     {% for route in config.connected_route_communities %}
         if net ~ [ {{ route.destination }} ] then {
             {% for community in route.communities %}
+                bgp_community.add(({{ community[0] }}, {{ community[1] }}));
+            {% endfor %}
+            {% for community in route.large_communities %}
                 bgp_large_community.add(({{ community[0] }}, {{ community[1] }} , {{ community[2] }}));
             {% endfor %}
         }
@@ -134,6 +144,9 @@ filter ospf_in {
     {% for route in config.ospf_route_communities %}
         if net ~ [ {{ route.destination }} ] then {
             {% for community in route.communities %}
+                bgp_community.add(({{ community[0] }}, {{ community[1] }}));
+            {% endfor %}
+            {% for community in route.large_communities %}
                 bgp_large_community.add(({{ community[0] }}, {{ community[1] }} , {{ community[2] }}));
             {% endfor %}
         }
