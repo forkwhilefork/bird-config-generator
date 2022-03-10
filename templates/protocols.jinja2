@@ -58,7 +58,7 @@ filter static_in {
                     bgp_community.add(({{ community[0] }}, {{ community[1] }}));
                 {% endfor %}
                 {% for community in route.large_communities %}
-                    bgp_large_community.add(({{ community[0] }}, {{ community[1] }} , {{ community[2] }}));
+                    bgp_large_community.add(({{ community[0] }}, {{ community[1] }}, {{ community[2] }}));
                 {% endfor %}
             }
         {% endif %}
@@ -72,7 +72,7 @@ filter static_in {
                     bgp_community.add(({{ community[0] }}, {{ community[1] }}));
                 {% endfor %}
                 {% for community in route.large_communities %}
-                    bgp_large_community.add(({{ community[0] }}, {{ community[1] }} , {{ community[2] }}));
+                    bgp_large_community.add(({{ community[0] }}, {{ community[1] }}, {{ community[2] }}));
                 {% endfor %}
             }
         {% endif %}
@@ -121,7 +121,7 @@ filter direct_in {
                 bgp_community.add(({{ community[0] }}, {{ community[1] }}));
             {% endfor %}
             {% for community in route.large_communities %}
-                bgp_large_community.add(({{ community[0] }}, {{ community[1] }} , {{ community[2] }}));
+                bgp_large_community.add(({{ community[0] }}, {{ community[1] }}, {{ community[2] }}));
             {% endfor %}
         }
     {% endfor %}
@@ -147,7 +147,7 @@ filter ospf_in {
                 bgp_community.add(({{ community[0] }}, {{ community[1] }}));
             {% endfor %}
             {% for community in route.large_communities %}
-                bgp_large_community.add(({{ community[0] }}, {{ community[1] }} , {{ community[2] }}));
+                bgp_large_community.add(({{ community[0] }}, {{ community[1] }}, {{ community[2] }}));
             {% endfor %}
         }
     {% endfor %}
@@ -240,7 +240,7 @@ filter ospf_in {
                             bgp_community.add(({{ community[0] }}, {{ community[1] }}));
                         {% endfor %}
                         {% for community in comm.large_communities %}
-                            bgp_large_community.add(({{ community[0] }}, {{ community[1] }} , {{ community[2] }}));
+                            bgp_large_community.add(({{ community[0] }}, {{ community[1] }}, {{ community[2] }}));
                         {% endfor %}
                     {% else %}
                         if net ~ [ {{ comm.prefix }} ] then {
@@ -248,7 +248,7 @@ filter ospf_in {
                                 bgp_community.add(({{ community[0] }}, {{ community[1] }}));
                             {% endfor %}
                             {% for community in comm.large_communities %}
-                                bgp_large_community.add(({{ community[0] }}, {{ community[1] }} , {{ community[2] }}));
+                                bgp_large_community.add(({{ community[0] }}, {{ community[1] }}, {{ community[2] }}));
                             {% endfor %}
                         }
                     {% endif %}
@@ -293,7 +293,7 @@ filter ospf_in {
                             bgp_community.add(({{ community[0] }}, {{ community[1] }}));
                         {% endfor %}
                         {% for community in comm.large_communities %}
-                            bgp_large_community.add(({{ community[0] }}, {{ community[1] }} , {{ community[2] }}));
+                            bgp_large_community.add(({{ community[0] }}, {{ community[1] }}, {{ community[2] }}));
                         {% endfor %}
                     {% else %}
                         if net ~ [ {{ comm.prefix }} ] then {
@@ -301,7 +301,7 @@ filter ospf_in {
                                 bgp_community.add(({{ community[0] }}, {{ community[1] }}));
                             {% endfor %}
                             {% for community in comm.large_communities %}
-                                bgp_large_community.add(({{ community[0] }}, {{ community[1] }} , {{ community[2] }}));
+                                bgp_large_community.add(({{ community[0] }}, {{ community[1] }}, {{ community[2] }}));
                             {% endfor %}
                         }
                     {% endif %}
