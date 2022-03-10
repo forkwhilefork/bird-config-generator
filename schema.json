@@ -180,7 +180,7 @@
                         "type":"integer",
                         "minimum": 1
                     },
-                    "communities_for_announced_routes":{
+                    "communities_on_egress":{
                         "type": "array",
                         "items":{
                             "type":"object",

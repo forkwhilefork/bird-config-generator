@@ -251,8 +251,8 @@ filter ospf_in {
 
             apply_export_communities({{ session.asn }});
 
-            {% if session.communities_for_announced_routes is defined %}
-                {% for comm in session.communities_for_announced_routes %}
+            {% if session.communities_on_egress is defined %}
+                {% for comm in session.communities_on_egress %}
                     {% if comm.prefix == "all" %}
                         {% for community in comm.communities %}
                             bgp_community.add(({{ community[0] }}, {{ community[1] }}));
