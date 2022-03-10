@@ -52,7 +52,7 @@
 filter static_in {
 
     {% for route in config.static_routes_v4 %}
-        {% if route.communities is defined %}
+        {% if route.communities is defined or route.large_communities is defined %}
             if net ~ [ {{ route.destination }} ] then {
                 {% for community in route.communities %}
                     bgp_community.add(({{ community[0] }}, {{ community[1] }}));
@@ -66,7 +66,7 @@ filter static_in {
     {% endfor %}
 
     {% for route in config.static_routes_v6 %}
-        {% if route.communities is defined %}
+        {% if route.communities is defined or route.large_communities is defined %}
             if net ~ [ {{ route.destination }} ] then {
                 {% for community in route.communities %}
                     bgp_community.add(({{ community[0] }}, {{ community[1] }}));
